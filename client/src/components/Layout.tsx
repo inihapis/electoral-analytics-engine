@@ -98,15 +98,25 @@ export default function Layout() {
           
           <div className="pt-6 pb-2">
             <p className="px-4 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4">Lainnya</p>
-            <a
-              href={`${apiBaseUrl}/api/docs`}
-              target="_blank"
-              rel="noreferrer"
-              className="group flex items-center gap-3.5 px-4 py-3 text-slate-600 hover:bg-secondary/10 hover:text-secondary rounded-xl transition-all duration-300"
+            {user?.role === 'SUPERADMIN' && (
+              <a
+                href={`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api-docs`}
+                target="_blank"
+                rel="noreferrer"
+                className="group flex items-center gap-3.5 px-4 py-3 rounded-xl transition-all duration-300 text-slate-600 hover:bg-slate-100 hover:text-slate-900 cursor-pointer"
+              >
+                <BookOpen className="w-5 h-5 group-hover:scale-110 transition-transform duration-300" />
+                <span className="font-semibold text-sm">API Documentation</span>
+                <ExternalLink className="ml-auto w-3 h-3 opacity-50" />
+              </a>
+            )}
+            <button
+              onClick={handleLogout}
+              className="w-full group flex items-center gap-3.5 px-4 py-3 rounded-xl transition-all duration-300 text-red-600 hover:bg-red-50 cursor-pointer"
             >
-              <BookOpen className="w-5 h-5 group-hover:scale-110 transition-transform duration-300" />
-              <span className="font-semibold text-sm">Dokumentasi API</span>
-            </a>
+              <LogOut className="w-5 h-5 group-hover:scale-110 transition-transform duration-300" />
+              <span className="font-semibold text-sm">Keluar</span>
+            </button>
           </div>
         </nav>
 
@@ -114,7 +124,7 @@ export default function Layout() {
         <div className="p-4 mt-auto border-t border-slate-100/80">
           <button 
             onClick={handleLogout}
-            className="flex items-center gap-3.5 w-full px-4 py-3 text-slate-500 hover:text-destructive hover:bg-destructive/5 rounded-xl transition-all duration-300 font-bold text-sm"
+            className="flex items-center gap-3.5 w-full px-4 py-3 text-slate-500 hover:text-destructive hover:bg-destructive/5 rounded-xl transition-all duration-300 font-bold text-sm cursor-pointer"
           >
             <LogOut className="w-5 h-5" />
             Keluar Sistem

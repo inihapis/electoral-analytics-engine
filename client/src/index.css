@@ -78,6 +78,13 @@
     --ring: #064e3b;
 
     --radius: 0.75rem;
+
+    /* Candidate Colors */
+    --candidate-blue: #3b82f6;
+    --candidate-red: #ef4444;
+    --candidate-yellow: #eab308;
+    --candidate-green: #22c55e;
+    --candidate-gray: #94a3b8;
   }
 
   .dark {

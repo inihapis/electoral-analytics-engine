@@ -20,11 +20,9 @@ model User {
 model Candidate {
   id          String               @id @default(uuid())
   name        String               @unique
-  color       CandidateColor
   createdAt   DateTime             @default(now())
   updatedAt   DateTime             @updatedAt
   affiliation String?
-  indicators  CandidateIndicator[]
   supportedBpds Bpd[]              @relation("SupportedBpd")
 }
 
@@ -47,28 +45,6 @@ model Bpd {
   updatedBy            User                 @relation("UpdatedBy", fields: [updatedById], references: [id])
   supportedCandidateId String?
   supportedCandidate   Candidate?           @relation("SupportedBpd", fields: [supportedCandidateId], references: [id])
-  indicators           CandidateIndicator[]
-}
-
-model CandidateIndicator {
-  id              String    @id @default(uuid())
-  bpdId           String
-  candidateId     String
-  suratBaiat      Boolean   @default(false)
-  afiliasiPolitik Boolean   @default(false)
-  videoDukungan   Boolean   @default(false)
-  kedekatanMc     Boolean   @default(false)
-  atributFisik    Boolean   @default(false)
-  sosialMedia     Boolean   @default(false)
-  totalPoints     Float     @default(0)
-  score           Float     @default(0)
-  estimatedVotes  Float     @default(0)
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
-  bpd             Bpd       @relation(fields: [bpdId], references: [id], onDelete: Cascade)
-  candidate       Candidate @relation(fields: [candidateId], references: [id], onDelete: Cascade)
-
-  @@unique([bpdId, candidateId])
 }
 
 enum Role {
@@ -89,9 +65,4 @@ enum Characteristic {
   WASPADA
 }
 
-enum CandidateColor {
-  BLUE
-  RED
-  YELLOW
-  GREEN
-}
+

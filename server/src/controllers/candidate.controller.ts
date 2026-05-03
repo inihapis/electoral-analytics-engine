@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
-import { calculateCandidateStats } from '../utils/calculations';
+
 
 const prisma = new PrismaClient();
 
@@ -8,34 +8,34 @@ export const getAllCandidates = async (req: Request, res: Response) => {
   try {
     const candidates = await prisma.candidate.findMany({
       include: {
-        indicators: {
-          include: {
-            bpd: {
-              include: { updatedBy: { select: { username: true } } }
-            }
-          }
+        supportedBpds: {
+          include: { updatedBy: { select: { username: true } } }
         }
       },
       orderBy: { name: 'asc' }
     });
 
-    // Calculate real-time stats for each candidate
     const candidatesWithStats = candidates.map(candidate => {
-      const stats = calculateCandidateStats([{
-        candidateId: candidate.id,
-        candidateName: candidate.name,
-        candidateColor: candidate.color,
-        candidateAffiliation: candidate.affiliation ?? undefined,
-        indicators: candidate.indicators.map(ind => ({
-          estimatedVotes: ind.estimatedVotes,
-          score: ind.score,
-          totalPoints: ind.totalPoints
-        }))
-      }])[0];
+      const { computeBpdScores } = require('../utils/calculations');
+      
+      const bpdScores = candidate.supportedBpds.map(bpd => computeBpdScores(bpd));
+      
+      const totalBpdDukung = candidate.supportedBpds.length;
+      // Suara Riil: Integer (BPD * 5)
+      const totalSuaraRiil = totalBpdDukung * 5;
+      // Suara Efektif: Float (Analytical)
+      const totalSuaraEfektif = bpdScores.reduce((acc, s) => acc + s.estimatedVotes, 0);
+      
+      const totalSkorProbabilitas = bpdScores.reduce((acc, s) => acc + s.score, 0);
+      const progress = Math.round((totalSuaraEfektif / 96) * 100 * 100) / 100;
 
       return {
         ...candidate,
-        ...stats
+        totalBpdDukung,
+        totalSuaraRiil,
+        totalSuaraEfektif: Math.round(totalSuaraEfektif * 100) / 100,
+        totalSkorProbabilitas: Math.round(totalSkorProbabilitas * 100) / 100,
+        progress
       };
     });
 
@@ -51,12 +51,8 @@ export const getCandidateById = async (req: Request, res: Response) => {
     const candidate = await prisma.candidate.findUnique({
       where: { id },
       include: {
-        indicators: {
-          include: {
-            bpd: {
-              include: { updatedBy: { select: { username: true } } }
-            }
-          }
+        supportedBpds: {
+          include: { updatedBy: { select: { username: true } } }
         }
       }
     });
@@ -64,44 +60,5 @@ export const getCandidateById = async (req: Request, res: Response) => {
     res.json(candidate);
   } catch (error) {
     res.status(500).json({ error: 'Failed to fetch candidate' });
-  }
-};
-
-export const updateCandidateIndicator = async (req: Request, res: Response) => {
-  const { bpdId, candidateId } = req.params;
-  const data = req.body;
-  const userId = (req as any).user?.id;
-  
-  try {
-    // Recalculate scores
-    const { computeBpdScores } = await import('../utils/calculations');
-    const { totalPoints, score, estimatedVotes } = computeBpdScores(data);
-
-    const indicator = await prisma.candidateIndicator.upsert({
-      where: {
-        bpdId_candidateId: { bpdId, candidateId }
-      },
-      update: {
-        ...data,
-        totalPoints,
-        score,
-        estimatedVotes,
-      },
-      create: {
-        bpdId,
-        candidateId,
-        ...data,
-        totalPoints,
-        score,
-        estimatedVotes,
-      },
-      include: {
-        candidate: true
-      }
-    });
-
-    res.json(indicator);
-  } catch (error) {
-    res.status(500).json({ error: 'Failed to update candidate indicator' });
   }
 };

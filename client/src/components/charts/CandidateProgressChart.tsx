@@ -1,5 +1,4 @@
 import { formatVotes } from '@/utils/format';
-import { CANDIDATE_COLORS } from '@/utils/constants';
 
 interface CandidateProgressChartProps {
   data: Array<{
@@ -14,38 +13,31 @@ interface CandidateProgressChartProps {
 export default function CandidateProgressChart({ data, targetVotes }: CandidateProgressChartProps) {
   return (
     <div className="space-y-4">
-      {data.map((candidate) => {
+      {data.map((candidate, idx) => {
         const progress = Math.min((candidate.totalVotes / targetVotes) * 100, 100);
         const remaining = Math.max(targetVotes - candidate.totalVotes, 0);
-        const color = CANDIDATE_COLORS[candidate.color] || CANDIDATE_COLORS.GRAY;
+        const color = candidate.color;
 
         return (
-          <div key={candidate.id} className="space-y-2">
+          <div key={candidate.id || `progress-${idx}`} className="space-y-1.5">
             <div className="flex justify-between items-center">
               <div className="flex items-center gap-2">
                 <div 
-                  className="w-3 h-3 rounded-full" 
+                  className="w-2.5 h-2.5 rounded-full" 
                   style={{ backgroundColor: color }}
                 />
-                <span className="font-medium text-sm">{candidate.name}</span>
+                <span className="font-bold text-[13px] text-slate-700">{candidate.name}</span>
               </div>
-              <div className="text-sm">
-                <span className="font-bold">{formatVotes(candidate.totalVotes)}</span>
-                <span className="text-gray-500"> / {targetVotes}</span>
-              </div>
+              <span className="text-[13px] font-black text-slate-900">{progress.toFixed(1)}%</span>
             </div>
-            <div className="w-full bg-gray-100 rounded-full h-3">
+            <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
               <div 
-                className="h-3 rounded-full transition-all duration-500" 
+                className="h-full transition-all duration-1000" 
                 style={{ 
                   width: `${progress}%`,
                   backgroundColor: color
                 }}
               />
-            </div>
-            <div className="flex justify-between text-xs text-gray-500">
-              <span>{progress.toFixed(1)}%</span>
-              <span>Dibutuhkan {formatVotes(remaining)} suara lagi</span>
             </div>
           </div>
         );

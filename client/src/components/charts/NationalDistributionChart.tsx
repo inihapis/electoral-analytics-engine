@@ -1,12 +1,10 @@
 import { 
-  BarChart, 
-  Bar, 
-  XAxis, 
-  YAxis, 
-  CartesianGrid, 
+  PieChart, 
+  Pie, 
+  Cell, 
   Tooltip, 
-  ResponsiveContainer, 
-  Cell
+  ResponsiveContainer,
+  Legend
 } from 'recharts';
 import { CANDIDATE_COLORS } from '@/utils/constants';
 
@@ -22,42 +20,51 @@ export default function NationalDistributionChart({ data }: NationalDistribution
   const chartData = data.map(c => ({
     name: c.name,
     value: c.totalSkorProbabilitas,
-    color: CANDIDATE_COLORS[c.color] || CANDIDATE_COLORS.GRAY,
-  }));
+    color: c.color,
+  })).filter(c => c.value > 0);
+
+  const total = chartData.reduce((acc, curr) => acc + curr.value, 0);
 
   return (
-    <ResponsiveContainer width="100%" height={300}>
-      <BarChart 
-        data={chartData} 
-        layout="vertical"
-        margin={{ top: 5, right: 30, left: 40, bottom: 5 }}
-      >
-        <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#f1f5f9" />
-        <XAxis type="number" hide />
-        <YAxis 
-          type="category" 
-          dataKey="name" 
-          width={100} 
-          axisLine={false}
-          tickLine={false}
-          tick={{ fontSize: 12, fontWeight: 600, fill: '#64748b' }}
-        />
-        <Tooltip 
-          cursor={{ fill: '#f8fafc' }}
-          contentStyle={{ 
-            borderRadius: '12px', 
-            border: 'none', 
-            boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)',
-            padding: '12px'
-          }}
-          formatter={(value: any) => [`${Number(value).toFixed(1)}%`, 'Proporsi Kekuatan']}
-        />
-        <Bar dataKey="value" radius={[0, 4, 4, 0]} barSize={24}>
-          {chartData.map((entry, index) => (
-            <Cell key={`cell-${index}`} fill={entry.color} />
-          ))}
-        </Bar>
-      </BarChart>
-    </ResponsiveContainer>
+    <div className="relative w-full h-[300px]">
+      <ResponsiveContainer width="100%" height="100%">
+        <PieChart>
+          <Pie
+            data={chartData}
+            cx="50%"
+            cy="50%"
+            innerRadius={60}
+            outerRadius={80}
+            paddingAngle={5}
+            dataKey="value"
+          >
+            {chartData.map((entry, index) => (
+              <Cell key={`cell-${index}`} fill={entry.color} stroke="none" />
+            ))}
+          </Pie>
+          <Tooltip 
+            contentStyle={{ 
+              borderRadius: '16px', 
+              border: 'none', 
+              boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.1)',
+              padding: '12px'
+            }}
+            formatter={(value: any) => [`${((Number(value) / total) * 100).toFixed(1)}%`, 'Pangsa Kekuatan']}
+          />
+          <Legend 
+            verticalAlign="bottom" 
+            height={36}
+            iconType="circle"
+            formatter={(value) => <span className="text-[10px] font-black uppercase text-slate-500 tracking-tighter">{value}</span>}
+          />
+        </PieChart>
+      </ResponsiveContainer>
+      
+      {/* Center Label */}
+      <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none mb-8">
+        <span className="text-[10px] font-black text-slate-400 uppercase">Total Skor</span>
+        <span className="text-xl font-black text-slate-800">{total.toFixed(1)}</span>
+      </div>
+    </div>
   );
 }

@@ -3,13 +3,18 @@ import { bpdService, candidateService } from '@/services/api';
 import { formatPercent, formatVotes } from '@/utils/format';
 import {
   Target,
-  Activity
+  Activity,
+  Users,
+  Map as MapIcon,
+  TrendingUp,
+  BarChart2
 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import CandidateComparisonChart from '@/components/charts/CandidateComparisonChart';
 import CandidateProgressChart from '@/components/charts/CandidateProgressChart';
 import NationalDistributionChart from '@/components/charts/NationalDistributionChart';
 import IndonesiaMapChart from '@/components/charts/IndonesiaMapChart';
+import { CANDIDATE_COLORS, getCandidateColor } from '@/utils/constants';
 
 export default function Dashboard() {
   const { data: stats, isLoading: statsLoading } = useQuery({
@@ -30,115 +35,136 @@ export default function Dashboard() {
   const isLoading = statsLoading || bpdsLoading || candidatesLoading;
 
   return (
-    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
-      {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        <Card className="relative overflow-hidden border-none bg-gradient-to-br from-primary to-primary/90 text-white shadow-2xl shadow-primary/20 group">
-          <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:opacity-20 transition-opacity duration-500">
-            <Activity className="h-24 w-24 -mr-8 -mt-8" />
+    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 pb-12">
+      {/* Overview Summary */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <Card className="relative overflow-hidden border-none bg-gradient-to-br from-slate-900 to-slate-800 text-white shadow-xl">
+          <div className="absolute top-0 right-0 p-6 opacity-10">
+            <Activity className="h-16 w-16 -mr-4 -mt-4" />
           </div>
-          <CardHeader className="pb-2 relative z-10">
-            <div className="flex items-center gap-2 px-3 py-1 bg-white/10 rounded-full w-fit mb-2">
-              <Activity className="h-3.5 w-3.5" />
-              <span className="text-[10px] font-black uppercase tracking-widest">Aktivitas Real-time</span>
-            </div>
-            <CardTitle className="text-lg font-bold text-white/90">Total Suara Efektif</CardTitle>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-xs font-bold uppercase tracking-widest text-slate-400">Total Suara Efektif (Nasional)</CardTitle>
           </CardHeader>
-          <CardContent className="relative z-10 pt-4">
-            <div className="text-5xl font-black tracking-tighter mb-1 animate-subtle-float">
-              {stats?.totalEfektif != null ? formatVotes(stats.totalEfektif) : 0}
-            </div>
-            <div className="flex items-center gap-2 mt-4 text-primary-foreground/80">
-              <div className="h-1 flex-1 bg-white/20 rounded-full overflow-hidden">
-                <div 
-                  className="h-full bg-secondary transition-all duration-1000" 
-                  style={{ width: `${Math.min(((stats?.totalEfektif || 0) / 96) * 100, 100)}%` }} 
-                />
-              </div>
-              <p className="text-xs font-bold uppercase tracking-wider">
-                {stats?.totalDukungan || 0} Dukungan
-              </p>
+          <CardContent>
+            <div className="text-4xl font-black">{stats?.totalEfektif != null ? formatVotes(stats.totalEfektif) : 0}</div>
+            <p className="text-[10px] text-slate-500 mt-1 uppercase font-bold tracking-tighter">Akumulasi probabilitas dari 38 Provinsi</p>
+          </CardContent>
+        </Card>
+
+        <Card className="relative overflow-hidden border-none bg-white shadow-xl shadow-slate-200/50">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-xs font-bold uppercase tracking-widest text-slate-500 text-primary">Wilayah Terkunci</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-4xl font-black text-slate-900">{stats?.terkunci || 0} <span className="text-lg text-slate-400">/ 38</span></div>
+            <div className="w-full bg-slate-100 h-1.5 rounded-full mt-2 overflow-hidden">
+              <div 
+                className="h-full bg-green-500 transition-all duration-1000" 
+                style={{ width: `${((stats?.terkunci || 0) / 38) * 100}%` }} 
+              />
             </div>
           </CardContent>
         </Card>
 
-        <Card className="relative overflow-hidden border-none bg-gradient-to-br from-white to-slate-50 shadow-xl shadow-slate-200/50 group">
-          <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity duration-500">
-            <Target className="h-24 w-24 -mr-8 -mt-8 text-primary" />
-          </div>
-          <CardHeader className="pb-2 relative z-10">
-            <div className="flex items-center gap-2 px-3 py-1 bg-primary/5 text-primary rounded-full w-fit mb-2">
-              <Target className="h-3.5 w-3.5" />
-              <span className="text-[10px] font-black uppercase tracking-widest">Target Kemenangan</span>
-            </div>
-            <CardTitle className="text-lg font-bold text-slate-800">Progress Menuju 50%+1</CardTitle>
+        <Card className="relative overflow-hidden border-none bg-white shadow-xl shadow-slate-200/50">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-xs font-bold uppercase tracking-widest text-slate-500 text-secondary">Belum Menentukan</CardTitle>
           </CardHeader>
-          <CardContent className="relative z-10 pt-4">
-            <div className="text-5xl font-black tracking-tighter text-slate-900 mb-1">
-              {stats?.progress != null ? formatPercent(stats.progress) : 0}<span className="text-2xl text-slate-400">%</span>
-            </div>
-            <p className="mt-4 text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-2">
-              <span className="inline-block w-2 h-2 rounded-full bg-secondary animate-pulse" />
-              Butuh {formatVotes(Math.max(0, 96 - (stats?.totalEfektif || 0)))} suara lagi
-            </p>
+          <CardContent>
+            <div className="text-4xl font-black text-slate-900">{stats?.unassigned != null ? stats.unassigned : (38 - (stats?.totalBpds || 0))} <span className="text-lg text-slate-400">/ 38</span></div>
+            <p className="text-[10px] text-slate-400 mt-1 uppercase font-bold tracking-tighter">BPD yang belum menentukan arah dukungan</p>
           </CardContent>
         </Card>
       </div>
 
-      {/* Candidate Charts Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card className="lg:col-span-2">
-          <CardHeader>
-            <CardTitle>Perbandingan Kekuatan Kandidat</CardTitle>
-            <CardDescription>
-              Total suara riil, skor probabilitas, dan BPD dukung per kandidat
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <CandidateComparisonChart 
-              data={candidates?.map((c: any) => ({
-                name: c.name,
-                color: c.color,
-                totalVotes: c.totalSuaraRiil || 0,
-                totalScore: c.totalSkorProbabilitas || 0,
-                totalBpd: c.totalBpdDukung || 0,
-              })) || []}
-            />
-          </CardContent>
-        </Card>
+      {/* Candidate Status Cards */}
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <h2 className="text-lg font-black tracking-tight text-slate-800 flex items-center gap-2">
+            <Users className="h-5 w-5 text-primary" />
+            STATUS KEKUATAN CAKETUM
+          </h2>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          {candidates?.map((c: any, idx: number) => (
+            <Card key={c.id || `candidate-${idx}`} className="border-none shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden group">
+              <div className={`h-1 w-full`} style={{ backgroundColor: getCandidateColor(c.name) }} />
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-black truncate">{c.name}</CardTitle>
+                <CardDescription className="text-[10px] font-bold uppercase tracking-tighter">{c.affiliation || 'Independen'}</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-3 gap-2">
+                  <div className="bg-slate-50 p-2 rounded-lg">
+                    <p className="text-[8px] font-bold text-slate-400 uppercase tracking-tighter">BPD Dukung</p>
+                    <p className="text-base font-black text-slate-800">{c.totalBpdDukung || 0}</p>
+                  </div>
+                  <div className="bg-slate-50 p-2 rounded-lg">
+                    <p className="text-[8px] font-bold text-slate-400 uppercase tracking-tighter">Suara Riil</p>
+                    <p className="text-base font-black text-slate-800">{(c.totalBpdDukung || 0) * 5}</p>
+                  </div>
+                  <div className="bg-slate-50 p-2 rounded-lg border-l-2 border-primary/20">
+                    <p className="text-[8px] font-bold text-slate-400 uppercase tracking-tighter">Suara Efektif</p>
+                    <p className="text-base font-black text-primary">{formatVotes(c.totalSuaraEfektif || 0)}</p>
+                  </div>
+                </div>
+                <div className="space-y-1">
+                  <div className="flex justify-between items-center text-[10px] font-bold uppercase tracking-tighter text-slate-500">
+                    <span>Progress Kemenangan</span>
+                    <span className="text-slate-900">{formatPercent(c.progress || 0)}%</span>
+                  </div>
+                  <div className="w-full bg-slate-100 h-1 rounded-full overflow-hidden">
+                    <div 
+                      className="h-full transition-all duration-1000" 
+                      style={{ 
+                        width: `${Math.min(c.progress || 0, 100)}%`,
+                        backgroundColor: getCandidateColor(c.name)
+                      }} 
+                    />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </div>
 
-        <Card>
+      {/* Main Charts Row */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <Card className="border-none shadow-xl">
           <CardHeader>
-            <CardTitle>Progress Menuju 50%+1</CardTitle>
-            <CardDescription>
-              Progress masing-masing kandidat menuju 96 suara
-            </CardDescription>
+            <div className="flex items-center gap-2 mb-1">
+              <TrendingUp className="h-4 w-4 text-primary" />
+              <CardTitle className="text-base font-black uppercase tracking-tight">Progress Menuju Kemenangan</CardTitle>
+            </div>
+            <CardDescription className="text-xs">Persentase pencapaian target 96 suara (50%+1) per kandidat</CardDescription>
           </CardHeader>
           <CardContent>
             <CandidateProgressChart 
               data={candidates?.map((c: any) => ({
                 id: c.id,
                 name: c.name,
-                color: c.color,
-                totalVotes: c.totalSuaraRiil || 0,
+                color: getCandidateColor(c.name),
+                totalVotes: c.totalSuaraEfektif || 0,
               })) || []}
               targetVotes={96}
             />
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="border-none shadow-xl">
           <CardHeader>
-            <CardTitle>Distribusi Kekuatan Nasional</CardTitle>
-            <CardDescription>
-              Persentase distribusi skor kandidat terhadap total
-            </CardDescription>
+            <div className="flex items-center gap-2 mb-1">
+              <BarChart2 className="h-4 w-4 text-primary" />
+              <CardTitle className="text-base font-black uppercase tracking-tight">Distribusi Kekuatan Nasional</CardTitle>
+            </div>
+            <CardDescription className="text-xs">Dominasi total skor probabilitas di 38 provinsi</CardDescription>
           </CardHeader>
           <CardContent>
             <NationalDistributionChart 
               data={candidates?.map((c: any) => ({
                 name: c.name,
-                color: c.color,
+                color: getCandidateColor(c.name),
                 totalSkorProbabilitas: c.totalSkorProbabilitas || 0
               })) || []}
             />
@@ -146,50 +172,35 @@ export default function Dashboard() {
         </Card>
       </div>
 
-      {/* BPD Status Charts */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card className="lg:col-span-2">
-          <CardHeader>
-            <CardTitle>Pemetaan Wilayah (Heatmap)</CardTitle>
-            <CardDescription>
-              Visualisasi distribusi dukungan kandidat per provinsi
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
+      {/* Heatmap Section */}
+      <Card className="border-none shadow-xl overflow-hidden">
+        <CardHeader className="bg-slate-50/50 border-b border-slate-100">
+          <div className="flex items-center gap-2 mb-1">
+            <MapIcon className="h-4 w-4 text-primary" />
+            <CardTitle className="text-base font-black uppercase tracking-tight">Pemetaan Kekuatan (Heatmap)</CardTitle>
+          </div>
+          <CardDescription className="text-xs">Visualisasi dominasi kandidat di seluruh wilayah Indonesia</CardDescription>
+        </CardHeader>
+        <CardContent className="p-0">
+          <div className="h-[400px] sm:h-[500px]">
             <IndonesiaMapChart 
               data={bpds?.map((bpd: any) => {
-                // Get candidate indicators for this BPD
-                const candidateIndicators = candidates?.map((c: any) => {
-                  const indicator = c.indicators?.find((ind: any) => ind.bpdId === bpd.id);
-                  return {
-                    name: c.name,
-                    color: c.color,
-                    estimatedVotes: indicator?.estimatedVotes || 0
-                  };
-                }) || [];
-                
-                // Find dominant candidate
-                const dominant = candidateIndicators.reduce((max: any, curr: any) => 
-                  curr.estimatedVotes > max.estimatedVotes ? curr : max, 
-                  { name: null, estimatedVotes: 0 }
-                );
-                
                 return {
                   provinceName: bpd.provinceName,
-                  dominantCandidate: dominant.estimatedVotes > 0 ? dominant.color : null,
+                  dominantCandidate: bpd.supportedCandidate?.color || null,
                   supportStatus: bpd.supportStatus
                 };
               }) || []}
             />
-          </CardContent>
-        </Card>
+          </div>
+        </CardContent>
+      </Card>
 
-        <Card>
+      {/* Footer / Recent Updates */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <Card className="border-none shadow-xl">
           <CardHeader>
-            <CardTitle>Riwayat Update Terbaru</CardTitle>
-            <CardDescription>
-              5 provinsi terakhir yang diperbarui
-            </CardDescription>
+            <CardTitle className="text-base font-black">Riwayat Update Terakhir</CardTitle>
           </CardHeader>
           <CardContent>
             {isLoading ? (
@@ -197,51 +208,59 @@ export default function Dashboard() {
             ) : bpds?.length === 0 ? (
               <div className="text-center py-8 text-gray-400">Belum ada data.</div>
             ) : (
-              <div className="space-y-4">
+              <div className="space-y-3">
                 {bpds
                   ?.sort((a: any, b: any) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
-                  .slice(0, 5)
-                  .map((bpd: any) => (
-                    <div key={bpd.id} className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 transition-colors">
-                      <div className="flex items-center space-x-4">
-                        <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                          <Target className="w-5 h-5 text-blue-600" />
+                  .slice(0, 4)
+                  .map((bpd: any, idx: number) => (
+                    <div key={bpd.id || `bpd-update-${idx}`} className="flex items-center justify-between p-3 border border-slate-50 rounded-xl hover:bg-slate-50 transition-all duration-300">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 bg-primary/5 rounded-lg flex items-center justify-center">
+                          <MapIcon className="w-4 h-4 text-primary" />
                         </div>
                         <div>
-                          <div className="font-medium">{bpd.provinceName}</div>
-                          <div className="text-sm text-gray-500">
-                            oleh {bpd.updatedBy.username}
-                          </div>
+                          <p className="text-sm font-bold text-slate-800">{bpd.provinceName}</p>
+                          <p className="text-[10px] text-slate-400 font-medium">diperbarui oleh {bpd.updatedBy.username}</p>
                         </div>
                       </div>
                       <div className="text-right">
-                        <div className="flex items-center space-x-2">
-                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                            bpd.supportStatus === 'TERKUNCI' ? 'bg-green-100 text-green-800' :
-                            bpd.supportStatus === 'MENGARAH' ? 'bg-blue-100 text-blue-800' :
-                            'bg-orange-100 text-orange-800'
-                          }`}>
-                            {bpd.supportStatus === 'TERKUNCI' ? 'Terkunci' : 
-                             bpd.supportStatus === 'MENGARAH' ? 'Mengarah' : 'Dinamis'}
-                          </span>
-                          <span className="text-sm font-semibold text-gray-700">
-                            {formatVotes(bpd.estimatedVotes)} suara
-                          </span>
-                        </div>
-                        <div className="text-xs text-gray-400 mt-1">
-                          {new Date(bpd.updatedAt).toLocaleDateString('id-ID', {
-                            day: 'numeric',
-                            month: 'short',
-                            year: 'numeric',
-                            hour: '2-digit',
-                            minute: '2-digit'
-                          })}
-                        </div>
+                        <span className={`px-2 py-0.5 rounded-full text-[9px] font-black uppercase ${
+                          bpd.supportStatus === 'TERKUNCI' ? 'bg-green-100 text-green-700' :
+                          bpd.supportStatus === 'MENGARAH' ? 'bg-blue-100 text-blue-700' :
+                          'bg-orange-100 text-orange-700'
+                        }`}>
+                          {bpd.supportStatus}
+                        </span>
+                        <p className="text-[10px] font-bold text-slate-500 mt-1">{new Date(bpd.updatedAt).toLocaleDateString('id-ID')}</p>
                       </div>
                     </div>
                   ))}
               </div>
             )}
+          </CardContent>
+        </Card>
+
+        <Card className="border-none shadow-xl bg-gradient-to-br from-primary/5 to-transparent">
+          <CardHeader>
+            <CardTitle className="text-base font-black">Analisa Strategis</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="p-4 bg-white rounded-2xl border border-primary/10 shadow-sm">
+              <p className="text-xs font-bold text-slate-500 uppercase tracking-tighter mb-2">Kondisi Saat Ini</p>
+              <p className="text-sm text-slate-700 leading-relaxed italic">
+                "Berdasarkan data terkini, terdapat {stats?.terkunci || 0} wilayah terkunci. Fokus strategi sebaiknya dialihkan ke {stats?.mengarah || 0} wilayah dengan status 'MENGARAH' untuk memastikan dukungan suara efektif mencapai target 96."
+              </p>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="p-4 bg-white rounded-2xl border border-slate-100 shadow-sm">
+                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Karakteristik Solid</p>
+                <p className="text-2xl font-black text-slate-800">{stats?.solid || 0}</p>
+              </div>
+              <div className="p-4 bg-white rounded-2xl border border-slate-100 shadow-sm">
+                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Karakteristik Waspada</p>
+                <p className="text-2xl font-black text-red-500">{stats?.waspada || 0}</p>
+              </div>
+            </div>
           </CardContent>
         </Card>
       </div>

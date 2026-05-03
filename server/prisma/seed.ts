@@ -1,4 +1,4 @@
-import { PrismaClient, CandidateColor } from '@prisma/client';
+import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcrypt';
 import { computeBpdScores } from '../src/utils/calculations';
 
@@ -15,10 +15,10 @@ const PROVINCES = [
 ];
 
 const CANDIDATES = [
-  { name: 'Reynaldo Bryan', color: CandidateColor.BLUE, affiliation: 'Nasdem' },
-  { name: 'Ade Jona', color: CandidateColor.RED, affiliation: 'Gerindra' },
-  { name: 'Afie Kalla', color: CandidateColor.YELLOW, affiliation: 'Golkar' },
-  { name: 'Anthony Leong', color: CandidateColor.GREEN, affiliation: 'Gerindra' },
+  { name: 'Reynaldo Bryan', affiliation: 'Nasdem' },
+  { name: 'Ade Jona', affiliation: 'Gerindra' },
+  { name: 'Afie Kalla', affiliation: 'Golkar' },
+  { name: 'Anthony Leong', affiliation: 'Gerindra' },
 ];
 
 async function main() {
@@ -69,7 +69,6 @@ async function main() {
       update: {},
       create: {
         name: candidateData.name,
-        color: candidateData.color,
         affiliation: candidateData.affiliation,
       },
     });
@@ -113,60 +112,9 @@ async function main() {
       },
     });
 
-    // Create candidate indicators for each candidate
-    for (const candidate of candidates) {
-      // Create realistic candidate indicators based on candidate strength and province status
-      const candidateStrength = Math.random();
-      const isStrong = candidateStrength > 0.5;
-      
-      // Base indicators on province status
-      const baseIndicators = {
-        suratBaiat: Math.random() > 0.5, // Increased probability
-        afiliasiPolitik: Math.random() > 0.4, // Increased probability
-        videoDukungan: Math.random() > 0.6, // Increased probability
-        kedekatanMc: Math.random() > 0.3, // Increased probability
-        atributFisik: Math.random() > 0.3,
-        sosialMedia: Math.random() > 0.4,
-      };
-
-      const { totalPoints, score, estimatedVotes } = computeBpdScores(baseIndicators);
-
-      await prisma.candidateIndicator.upsert({
-        where: {
-          bpdId_candidateId: {
-            bpdId: bpd.id,
-            candidateId: candidate.id,
-          },
-        },
-        update: {
-          suratBaiat: baseIndicators.suratBaiat,
-          afiliasiPolitik: baseIndicators.afiliasiPolitik,
-          videoDukungan: baseIndicators.videoDukungan,
-          kedekatanMc: baseIndicators.kedekatanMc,
-          atributFisik: baseIndicators.atributFisik,
-          sosialMedia: baseIndicators.sosialMedia,
-          totalPoints,
-          score,
-          estimatedVotes,
-        },
-        create: {
-          bpdId: bpd.id,
-          candidateId: candidate.id,
-          suratBaiat: baseIndicators.suratBaiat,
-          afiliasiPolitik: baseIndicators.afiliasiPolitik,
-          videoDukungan: baseIndicators.videoDukungan,
-          kedekatanMc: baseIndicators.kedekatanMc,
-          atributFisik: baseIndicators.atributFisik,
-          sosialMedia: baseIndicators.sosialMedia,
-          totalPoints,
-          score,
-          estimatedVotes,
-        },
-      });
-    }
   }
-
-  console.log(`38 BPD entries with candidate indicators created/verified`);
+  
+  console.log(`38 BPD entries created/verified`);
   console.log('Seed completed - All calculated values will be computed in real-time by backend');
 }
 

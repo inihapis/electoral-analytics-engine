@@ -28,9 +28,9 @@ function App() {
           <Route index element={<Dashboard />} />
           <Route path="bpd" element={<BpdManagement />} />
           <Route path="users" element={<UserManagement />} />
+          <Route path="information" element={<Information />} />
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />
-        <Route path="/information" element={<Information />} />
       </Routes>
     </Router>
   );

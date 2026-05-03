@@ -104,41 +104,45 @@ export default function IndonesiaMapChart({ data }: IndonesiaMapChartProps) {
       </ComposableMap>
 
       {/* Legend */}
-      <div className="mt-4 flex flex-wrap gap-4 justify-center text-sm">
+      <div className="mt-4 flex flex-wrap gap-4 justify-center text-[10px] font-black uppercase tracking-tighter text-slate-500">
         <div className="flex items-center gap-2">
-          <div className="w-4 h-4 rounded" style={{ backgroundColor: CANDIDATE_COLORS.BLUE }} />
+          <div className="w-3 h-3 rounded-sm" style={{ backgroundColor: CANDIDATE_COLORS.BLUE }} />
           <span>Reynaldo Bryan</span>
         </div>
         <div className="flex items-center gap-2">
-          <div className="w-4 h-4 rounded" style={{ backgroundColor: CANDIDATE_COLORS.RED }} />
+          <div className="w-3 h-3 rounded-sm" style={{ backgroundColor: CANDIDATE_COLORS.RED }} />
           <span>Ade Jona</span>
         </div>
         <div className="flex items-center gap-2">
-          <div className="w-4 h-4 rounded" style={{ backgroundColor: CANDIDATE_COLORS.YELLOW }} />
+          <div className="w-3 h-3 rounded-sm" style={{ backgroundColor: CANDIDATE_COLORS.YELLOW }} />
           <span>Afie Kalla</span>
         </div>
         <div className="flex items-center gap-2">
-          <div className="w-4 h-4 rounded" style={{ backgroundColor: CANDIDATE_COLORS.GREEN }} />
+          <div className="w-3 h-3 rounded-sm" style={{ backgroundColor: CANDIDATE_COLORS.GREEN }} />
           <span>Anthony Leong</span>
         </div>
         <div className="flex items-center gap-2">
-          <div className="w-4 h-4 rounded" style={{ backgroundColor: CANDIDATE_COLORS.GRAY }} />
+          <div className="w-3 h-3 rounded-sm" style={{ backgroundColor: CANDIDATE_COLORS.GRAY }} />
           <span>Belum Menentukan</span>
         </div>
       </div>
 
       {/* Tooltip */}
       {hoveredProvince && (
-        <div className="mt-2 p-3 bg-white border rounded-lg shadow-lg text-sm">
-          <div className="font-bold">{hoveredProvince}</div>
+        <div className="absolute z-50 pointer-events-none p-3 bg-white/90 backdrop-blur-md border border-slate-200 rounded-xl shadow-2xl min-w-[200px] animate-in fade-in zoom-in-95 duration-200" style={{ left: '50%', transform: 'translateX(-50%)' }}>
+          <div className="font-black text-slate-900 border-b border-slate-100 pb-2 mb-2 uppercase tracking-tight">{hoveredProvince}</div>
           {(() => {
             const provinceData = getProvinceData(hoveredProvince);
-            if (!provinceData) return <div className="text-gray-500">Data tidak tersedia</div>;
+            if (!provinceData) return <div className="text-[10px] font-bold text-slate-400 uppercase">Belum ada data diinput</div>;
             return (
-              <div className="mt-1">
-                <div>Status: {provinceData.supportStatus}</div>
-                <div>
-                  Dominan: {provinceData.dominantCandidate || 'Belum menentukan'}
+              <div className="space-y-1.5">
+                <div className="flex justify-between">
+                  <span className="text-[10px] font-bold text-slate-400 uppercase">Status</span>
+                  <span className="text-[10px] font-black text-slate-700 uppercase">{provinceData.supportStatus}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-[10px] font-bold text-slate-400 uppercase">Caketum</span>
+                  <span className="text-[10px] font-black text-primary uppercase">{provinceData.dominantCandidate ? provinceData.dominantCandidate : 'Belum menentukan'}</span>
                 </div>
               </div>
             );

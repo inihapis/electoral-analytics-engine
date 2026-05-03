@@ -20,7 +20,7 @@ export const getAllBpds = async (req: Request, res: Response) => {
     const bpds = await prisma.bpd.findMany({
       include: { 
         updatedBy: { select: { username: true } },
-        supportedCandidate: { select: { name: true, color: true } }
+        supportedCandidate: { select: { name: true } }
       }
     });
     
@@ -48,7 +48,7 @@ export const getBpdById = async (req: Request, res: Response) => {
       where: { id },
       include: { 
         updatedBy: { select: { username: true } },
-        supportedCandidate: { select: { name: true, color: true } }
+        supportedCandidate: { select: { name: true } }
       }
     });
     if (!bpd) return res.status(404).json({ error: 'BPD not found' });
@@ -88,25 +88,25 @@ export const updateBpd = async (req: Request, res: Response) => {
     return res.status(400).json({ error: 'Karakteristik tidak valid. Pilih: Solid, Rentan, atau Waspada' });
   }
   
-  try {
-    const bpdUpdateData: any = {
-      provinceName: data.provinceName,
-      totalVotes: data.totalVotes,
-      targetMc: data.targetMc,
-      politicalAffiliation: data.politicalAffiliation,
-      supportStatus: data.supportStatus,
-      characteristic: data.characteristic,
-      suratBaiat: data.suratBaiat,
-      afiliasiPolitik: data.afiliasiPolitik,
-      videoDukungan: data.videoDukungan,
-      kedekatanMc: data.kedekatanMc,
-      atributFisik: data.atributFisik,
-      sosialMedia: data.sosialMedia,
-      supportedCandidateId: data.supportedCandidateId,
-      updatedById: userId,
-    };
+    try {
+      const bpdUpdateData: any = {
+        provinceName: data.provinceName,
+        totalVotes: Number(data.totalVotes) || 5,
+        targetMc: data.targetMc,
+        politicalAffiliation: data.politicalAffiliation,
+        supportStatus: data.supportStatus,
+        characteristic: data.characteristic,
+        suratBaiat: Boolean(data.suratBaiat),
+        afiliasiPolitik: Boolean(data.afiliasiPolitik),
+        videoDukungan: Boolean(data.videoDukungan),
+        kedekatanMc: Boolean(data.kedekatanMc),
+        atributFisik: Boolean(data.atributFisik),
+        sosialMedia: Boolean(data.sosialMedia),
+        supportedCandidateId: data.supportedCandidateId || null,
+        updatedById: userId,
+      };
 
-    const bpd = await prisma.bpd.update({
+      const bpd = await prisma.bpd.update({
       where: { id },
       data: bpdUpdateData
     });
@@ -153,7 +153,7 @@ export const createBpd = async (req: Request, res: Response) => {
       },
       include: { 
         updatedBy: { select: { username: true } },
-        supportedCandidate: { select: { name: true, color: true } }
+        supportedCandidate: { select: { name: true } }
       }
     });
     res.json(bpd);
@@ -205,6 +205,7 @@ export const getStatsSummary = async (req: Request, res: Response) => {
       solid: bpds.filter((b: any) => b.characteristic === 'SOLID').length,
       rentan: bpds.filter((b: any) => b.characteristic === 'RENTAN').length,
       waspada: bpds.filter((b: any) => b.characteristic === 'WASPADA').length,
+      unassigned: bpds.filter((b: any) => !b.supportedCandidateId).length,
     };
 
     res.json(stats);
@@ -215,8 +216,9 @@ export const getStatsSummary = async (req: Request, res: Response) => {
 
 function parseBoolean(value: unknown) {
   if (typeof value === 'boolean') return value;
+  if (typeof value === 'number') return value === 1;
   const text = String(value || '').trim().toLowerCase();
-  return ['true', '1', 'yes', 'y'].includes(text);
+  return ['true', '1', 'yes', 'y', 'ya', 'terpenuhi', 'v'].includes(text);
 }
 
 function normalizeHeader(value: string) {
@@ -225,6 +227,10 @@ function normalizeHeader(value: string) {
 
 export const bulkUpload = async (req: any, res: Response) => {
   const userId = req.user?.id;
+
+  if (!userId) {
+    return res.status(401).json({ error: 'Sesi anda telah berakhir atau ID user tidak ditemukan' });
+  }
 
   try {
     if (!req.file) {
@@ -244,46 +250,107 @@ export const bulkUpload = async (req: any, res: Response) => {
     const validStatuses = ['TERKUNCI', 'MENGARAH', 'DINAMIS'];
     const validCharacteristics = ['SOLID', 'RENTAN', 'WASPADA'];
     const uploadResult: string[] = [];
+    const errors: string[] = [];
 
-    for (const row of rows.slice(1)) {
+    // Map common aliases to canonical enum values
+    const statusMap: Record<string, string> = {
+      'TERKUNCI': 'TERKUNCI', 'LOCKED': 'TERKUNCI', 'FIX': 'TERKUNCI',
+      'MENGARAH': 'MENGARAH', 'TENDENCY': 'MENGARAH',
+      'DINAMIS': 'DINAMIS', 'DYNAMIC': 'DINAMIS', 'FLOATING': 'DINAMIS'
+    };
+
+    const charMap: Record<string, string> = {
+      'SOLID': 'SOLID', 'KUAT': 'SOLID',
+      'RENTAN': 'RENTAN', 'WEAK': 'RENTAN', 'VULNERABLE': 'RENTAN',
+      'WASPADA': 'WASPADA', 'WARNING': 'WASPADA', 'CAUTION': 'WASPADA'
+    };
+
+    // Fetch all candidates to map names to IDs
+    const allCandidates = await prisma.candidate.findMany();
+
+    for (const [rowIndex, row] of rows.slice(1).entries()) {
       const record: Record<string, any> = {};
       headers.forEach((header, index) => {
         record[header] = row[index];
       });
 
-      const provinceName = String(record['province_name'] || record['province'] || '').trim();
-      if (!provinceName) continue;
+      // Flexible header mapping
+      const provinceName = String(
+        record['province_name'] || record['province'] || record['provinsi'] || record['wilayah'] || record['nama_provinsi'] || ''
+      ).trim();
+      
+      if (!provinceName) {
+        errors.push(`Baris ${rowIndex + 2}: Nama provinsi kosong`);
+        continue;
+      }
 
-      const supportStatus = String(record['support_status'] || record['status'] || '').trim().toUpperCase();
-      const characteristic = String(record['characteristic'] || record['karakteristik'] || '').trim().toUpperCase();
-      if (!validStatuses.includes(supportStatus) || !validCharacteristics.includes(characteristic)) continue;
+      let supportStatus = String(
+        record['support_status'] || record['status'] || record['status_dukungan'] || 'DINAMIS'
+      ).trim().toUpperCase();
+      
+      let characteristic = String(
+        record['characteristic'] || record['karakteristik'] || record['sifat'] || 'WASPADA'
+      ).trim().toUpperCase();
+
+      // Normalize values using maps
+      supportStatus = statusMap[supportStatus] || (validStatuses.includes(supportStatus) ? supportStatus : 'DINAMIS');
+      characteristic = charMap[characteristic] || (validCharacteristics.includes(characteristic) ? characteristic : 'WASPADA');
+
+      // Find candidate ID by name
+      const candidateName = String(
+        record['supported_candidate'] || record['candidate'] || record['caketum'] || record['calon'] || ''
+      ).trim();
+      
+      let supportedCandidateId = null;
+      if (candidateName && candidateName !== '-') {
+        const found = allCandidates.find(c => c.name.toLowerCase() === candidateName.toLowerCase());
+        if (found) {
+          supportedCandidateId = found.id;
+        }
+      }
 
       const bpdData: any = {
         provinceName,
-        totalVotes: Number(record['total_votes'] ?? record['votes'] ?? 5) || 5,
+        totalVotes: Number(record['total_votes'] ?? record['votes'] ?? record['suara'] ?? 5) || 5,
         targetMc: String(record['target_mc'] || record['targetmc'] || record['target'] || '').trim() || null,
         politicalAffiliation: String(record['political_affiliation'] || record['politicalaffiliation'] || record['affiliation'] || '').trim() || null,
         supportStatus,
         characteristic,
-        suratBaiat: parseBoolean(record['surat_baiat'] || record['suratbaiat']),
-        afiliasiPolitik: parseBoolean(record['afiliasi_politik'] || record['afiliasipolitik']),
-        videoDukungan: parseBoolean(record['video_dukung'] || record['videodukungan'] || record['video_dukungan']),
+        suratBaiat: parseBoolean(record['surat_baiat'] || record['suratbaiat'] || record['baiat']),
+        afiliasiPolitik: parseBoolean(record['afiliasi_politik'] || record['afiliasipolitik'] || record['afiliasi']),
+        videoDukungan: parseBoolean(record['video_dukung'] || record['videodukungan'] || record['video_dukungan'] || record['video']),
         kedekatanMc: parseBoolean(record['kedekatan_mc'] || record['kedekatanmc'] || record['kedekatan']),
-        atributFisik: parseBoolean(record['atribut_fisik'] || record['atributfisik'] || record['atribut_fisik']),
-        sosialMedia: parseBoolean(record['sosial_media'] || record['sosialmedia'] || record['sosial_media']),
+        atributFisik: parseBoolean(record['atribut_fisik'] || record['atributfisik'] || record['atribut']),
+        sosialMedia: parseBoolean(record['sosial_media'] || record['sosialmedia'] || record['sosmed']),
+        supportedCandidateId,
       };
 
-      await prisma.bpd.upsert({
-        where: { provinceName },
-        update: { ...bpdData, updatedById: userId },
-        create: { ...bpdData, updatedById: userId }
-      });
-      uploadResult.push(provinceName);
+      try {
+        await prisma.bpd.upsert({
+          where: { provinceName },
+          update: { ...bpdData, updatedById: userId },
+          create: { ...bpdData, updatedById: userId }
+        });
+        uploadResult.push(provinceName);
+      } catch (err: any) {
+        console.error(`Error saving row ${rowIndex + 2}:`, err);
+        errors.push(`Baris ${rowIndex + 2} (${provinceName}): ${err.message || 'Gagal simpan'}`);
+      }
     }
 
-    res.json({ message: 'Upload berhasil', count: uploadResult.length, processed: uploadResult });
-  } catch (error) {
-    res.status(500).json({ error: 'Gagal upload BPDs' });
+    res.json({ 
+      message: uploadResult.length > 0 ? 'Upload berhasil' : 'Upload selesai dengan catatan', 
+      count: uploadResult.length, 
+      processed: uploadResult,
+      errors: errors.length > 0 ? errors : undefined
+    });
+  } catch (error: any) {
+    console.error('Bulk Upload Error:', error);
+    res.status(500).json({ 
+      error: 'Gagal upload BPDs', 
+      message: error.message,
+      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined 
+    });
   }
 };
 
@@ -378,9 +445,9 @@ export const exportToCsv = async (req: Request, res: Response) => {
     // Convert to CSV format
     const csvHeaders = [
       'Province Name', 'Total Votes', 'Target MC', 'Political Affiliation',
-      'Support Status', 'Characteristic', 'Surat Baiat', 'Afiliasi Politik',
-      'Video Dukungan', 'Kedekatan MC', 'Atribut Fisik', 'Sosial Media',
-      'Score (%)', 'Estimated Votes', 'Updated By', 'Updated At'
+      'Support Status', 'Characteristic', 'Supported Candidate', 'Surat Baiat', 
+      'Afiliasi Politik', 'Video Dukungan', 'Kedekatan MC', 'Atribut Fisik', 
+      'Sosial Media', 'Score (%)', 'Estimated Votes', 'Updated By', 'Updated At'
     ];
     
     const csvRows = bpdsWithScores.map((bpd: any) => [
@@ -390,6 +457,7 @@ export const exportToCsv = async (req: Request, res: Response) => {
       bpd.politicalAffiliation || '',
       bpd.supportStatus,
       bpd.characteristic,
+      bpd.supportedCandidate?.name || '-',
       bpd.suratBaiat ?? false,
       bpd.afiliasiPolitik ?? false,
       bpd.videoDukungan ?? false,
