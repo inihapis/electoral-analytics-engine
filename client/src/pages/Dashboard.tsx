@@ -2,7 +2,6 @@ import { useQuery } from '@tanstack/react-query';
 import { bpdService, candidateService } from '@/services/api';
 import { formatPercent, formatVotes } from '@/utils/format';
 import {
-  Target,
   Activity,
   Users,
   Map as MapIcon,
@@ -10,11 +9,10 @@ import {
   BarChart2
 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import CandidateComparisonChart from '@/components/charts/CandidateComparisonChart';
 import CandidateProgressChart from '@/components/charts/CandidateProgressChart';
 import NationalDistributionChart from '@/components/charts/NationalDistributionChart';
 import IndonesiaMapChart from '@/components/charts/IndonesiaMapChart';
-import { CANDIDATE_COLORS, getCandidateColor } from '@/utils/constants';
+import { getCandidateColor } from '@/utils/constants';
 
 export default function Dashboard() {
   const { data: stats, isLoading: statsLoading } = useQuery({

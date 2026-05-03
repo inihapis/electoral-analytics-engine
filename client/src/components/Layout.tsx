@@ -7,7 +7,8 @@ import {
   Info,
   BookOpen,
   ChevronRight,
-  Settings
+  Settings,
+  ExternalLink
 } from 'lucide-react';
 
 export default function Layout() {
@@ -15,7 +16,6 @@ export default function Layout() {
   const location = useLocation();
   const userJson = localStorage.getItem('user');
   const user = userJson ? JSON.parse(userJson) : null;
-  const apiBaseUrl = 'http://localhost:5000';
 
   const handleLogout = () => {
     localStorage.removeItem('token');

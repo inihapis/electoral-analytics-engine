@@ -1,8 +1,6 @@
 import { 
   FileSpreadsheet, 
   Download, 
-  Info, 
-  Target, 
   BarChart3, 
   Database,
   ExternalLink,

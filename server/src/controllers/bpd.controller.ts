@@ -359,7 +359,7 @@ export const saveSnapshot = async (req: any, res: Response) => {
     const bpds = await prisma.bpd.findMany({
       include: {
         updatedBy: { select: { id: true, username: true } },
-        indicators: { include: { candidate: true } }
+        supportedCandidate: { select: { id: true, name: true } }
       }
     });
 
@@ -398,6 +398,7 @@ export const restoreSnapshot = async (req: any, res: Response) => {
             kedekatanMc: bpd.kedekatanMc,
             atributFisik: bpd.atributFisik,
             sosialMedia: bpd.sosialMedia,
+            supportedCandidateId: bpd.supportedCandidateId,
             updatedById: bpd.updatedById,
           },
           create: {
@@ -413,6 +414,7 @@ export const restoreSnapshot = async (req: any, res: Response) => {
             kedekatanMc: bpd.kedekatanMc,
             atributFisik: bpd.atributFisik,
             sosialMedia: bpd.sosialMedia,
+            supportedCandidateId: bpd.supportedCandidateId,
             updatedById: bpd.updatedById,
           }
         })

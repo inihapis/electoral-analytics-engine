@@ -16,7 +16,7 @@ import {
   CheckCircle2,
   XCircle
 } from 'lucide-react';
-import { CANDIDATE_COLORS, getCandidateColor } from '@/utils/constants';
+import { getCandidateColor } from '@/utils/constants';
 import { Button } from '@/components/ui/button';
 import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
@@ -417,11 +417,6 @@ function BpdForm({ bpd, onSubmit, onCancel, isLoading, candidates }: any) {
     sosialMedia: bpd?.sosialMedia || false,
     supportedCandidateId: bpd?.supportedCandidateId || '',
   });
-
-  const getCandidateColor = (name: string) => {
-    const map: any = { 'Ade Jona': '#3b82f6', 'Anthony Leong': '#ef4444', 'Afie Kalla': '#eab308' };
-    return map[name] || '#64748b';
-  };
 
   return (
     <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[100] flex items-center justify-center p-4">

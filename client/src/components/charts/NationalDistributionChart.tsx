@@ -6,7 +6,7 @@ import {
   ResponsiveContainer,
   Legend
 } from 'recharts';
-import { CANDIDATE_COLORS } from '@/utils/constants';
+
 
 interface NationalDistributionChartProps {
   data: Array<{

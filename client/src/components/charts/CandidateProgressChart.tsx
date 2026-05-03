@@ -1,4 +1,4 @@
-import { formatVotes } from '@/utils/format';
+
 
 interface CandidateProgressChartProps {
   data: Array<{
@@ -15,7 +15,6 @@ export default function CandidateProgressChart({ data, targetVotes }: CandidateP
     <div className="space-y-4">
       {data.map((candidate, idx) => {
         const progress = Math.min((candidate.totalVotes / targetVotes) * 100, 100);
-        const remaining = Math.max(targetVotes - candidate.totalVotes, 0);
         const color = candidate.color;
 
         return (
