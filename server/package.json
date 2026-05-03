@@ -8,11 +8,8 @@
     "start": "node dist/index.js",
     "postinstall": "prisma generate",
     "prisma:generate": "prisma generate",
-    "prisma:migrate": "prisma migrate dev",
-    "prisma:seed": "tsx prisma/seed.ts",
-    "db:push": "prisma db push",
-    "deploy:setup": "prisma generate && prisma db push && tsx prisma/seed.ts",
-    "start:prod": "npm run deploy:setup && npm run start"
+    "prisma:migrate": "prisma migrate deploy",
+    "prisma:seed": "tsx prisma/seed.ts"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
