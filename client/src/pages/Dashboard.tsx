@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { bpdService, candidateService } from '@/services/api';
-import { formatPercent, formatVotes } from '@/utils/format';
+import { formatVotes } from '@/utils/format';
 import {
   Activity,
   Users,
@@ -31,11 +31,6 @@ export default function Dashboard() {
   });
 
   const isLoading = statsLoading || bpdsLoading || candidatesLoading;
-
-  // Get the most recent update
-  const latestUpdate = bpds && bpds.length > 0
-    ? [...bpds].sort((a: any, b: any) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())[0]
-    : null;
 
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700 pb-12">
