@@ -51,6 +51,9 @@ interface Candidate {
 
 export default function BpdManagement() {
   const [searchTerm, setSearchTerm] = useState('');
+  const [filterStatus, setFilterStatus] = useState<string>('');
+  const [filterCandidate, setFilterCandidate] = useState<string>('');
+  const [filterCharacteristic, setFilterCharacteristic] = useState<string>('');
   const [editingBpd, setEditingBpd] = useState<Bpd | null>(null);
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [showBulkUpload, setShowBulkUpload] = useState(false);
@@ -160,9 +163,13 @@ export default function BpdManagement() {
     }
   };
 
-  const filteredBpds = bpds?.filter((bpd: Bpd) =>
-    bpd.provinceName.toLowerCase().includes(searchTerm.toLowerCase())
-  ) || [];
+  const filteredBpds = bpds?.filter((bpd: Bpd) => {
+    const matchesSearch = bpd.provinceName.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesStatus = !filterStatus || bpd.supportStatus === filterStatus;
+    const matchesCandidate = !filterCandidate || bpd.supportedCandidateId === filterCandidate;
+    const matchesCharacteristic = !filterCharacteristic || bpd.characteristic === filterCharacteristic;
+    return matchesSearch && matchesStatus && matchesCandidate && matchesCharacteristic;
+  }) || [];
 
   return (
     <div className="space-y-6">
@@ -250,43 +257,97 @@ export default function BpdManagement() {
       </Card>
 
       {/* Toolbar */}
-      <div className="flex flex-col md:flex-row gap-4 items-center justify-between bg-slate-50/50 p-2 rounded-xl border border-slate-100">
-        <div className="relative w-full md:w-96">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-          <input
-            type="text"
-            placeholder="Cari provinsi..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all font-medium text-sm"
-          />
+      <div className="flex flex-col gap-4 bg-slate-50/50 p-4 rounded-xl border border-slate-100">
+        <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
+          <div className="relative w-full md:w-96">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+            <input
+              type="text"
+              placeholder="Cari provinsi..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-10 pr-4 py-2 bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all font-medium text-sm"
+            />
+          </div>
+          
+          {userRole === 'SUPERADMIN' && (
+            <div className="flex gap-2">
+              <Button variant="ghost" size="sm" onClick={() => { if(confirm('Simpan snapshot?')) saveSnapshotMutation.mutate() }} className="text-[10px] font-black uppercase text-slate-500 hover:text-primary">
+                <AlertTriangle className="w-3 h-3 mr-1" /> Simpan Snapshot
+              </Button>
+              <Button variant="ghost" size="sm" onClick={() => { if(confirm('Restore snapshot?')) restoreSnapshotMutation.mutate() }} className="text-[10px] font-black uppercase text-slate-500 hover:text-primary">
+                <AlertTriangle className="w-3 h-3 mr-1" /> Restore Snapshot
+              </Button>
+            </div>
+          )}
         </div>
         
-        {userRole === 'SUPERADMIN' && (
-          <div className="flex gap-2">
-            <Button variant="ghost" size="sm" onClick={() => { if(confirm('Simpan snapshot?')) saveSnapshotMutation.mutate() }} className="text-[10px] font-black uppercase text-slate-500 hover:text-primary">
-              <AlertTriangle className="w-3 h-3 mr-1" /> Simpan Snapshot
+        {/* Filters */}
+        <div className="flex flex-wrap gap-3">
+          <select
+            value={filterStatus}
+            onChange={(e) => setFilterStatus(e.target.value)}
+            className="px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-bold text-slate-600 focus:outline-none focus:ring-2 focus:ring-primary/20 cursor-pointer"
+          >
+            <option value="">Semua Status</option>
+            <option value="TERKUNCI">TERKUNCI</option>
+            <option value="MENGARAH">MENGARAH</option>
+            <option value="DINAMIS">DINAMIS</option>
+          </select>
+          
+          <select
+            value={filterCandidate}
+            onChange={(e) => setFilterCandidate(e.target.value)}
+            className="px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-bold text-slate-600 focus:outline-none focus:ring-2 focus:ring-primary/20 cursor-pointer"
+          >
+            <option value="">Semua Caketum</option>
+            {candidates?.map((c: any) => (
+              <option key={c.id} value={c.id}>{c.name}</option>
+            ))}
+          </select>
+          
+          <select
+            value={filterCharacteristic}
+            onChange={(e) => setFilterCharacteristic(e.target.value)}
+            className="px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-bold text-slate-600 focus:outline-none focus:ring-2 focus:ring-primary/20 cursor-pointer"
+          >
+            <option value="">Semua Karakteristik</option>
+            <option value="SOLID">SOLID</option>
+            <option value="RENTAN">RENTAN</option>
+            <option value="WASPADA">WASPADA</option>
+          </select>
+          
+          {(filterStatus || filterCandidate || filterCharacteristic) && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => {
+                setFilterStatus('');
+                setFilterCandidate('');
+                setFilterCharacteristic('');
+              }}
+              className="text-[10px] font-black uppercase text-red-500 hover:text-red-700"
+            >
+              Reset Filter
             </Button>
-            <Button variant="ghost" size="sm" onClick={() => { if(confirm('Restore snapshot?')) restoreSnapshotMutation.mutate() }} className="text-[10px] font-black uppercase text-slate-500 hover:text-primary">
-              <AlertTriangle className="w-3 h-3 mr-1" /> Restore Snapshot
-            </Button>
-          </div>
-        )}
+          )}
+        </div>
       </div>
 
-      {/* Main Table */}
+      {/* Main Table - Responsive Design */}
       <div className="bg-white rounded-xl shadow-xl border border-slate-100 overflow-hidden">
-        <div className="overflow-x-auto custom-scrollbar">
-          <table className="w-full text-left min-w-[1000px]">
+        {/* Desktop/Tablet Table View */}
+        <div className="hidden lg:block overflow-x-auto">
+          <table className="w-full text-left">
             <thead className="bg-slate-50 text-[10px] uppercase text-slate-400 font-black tracking-widest border-b border-slate-100">
               <tr>
-                <th className="px-6 py-4">Provinsi</th>
-                <th className="px-6 py-4">Status</th>
-                <th className="px-6 py-4">Caketum</th>
-                <th className="px-6 py-4 text-center">BPD</th>
-                <th className="px-6 py-4">Suara Efektif</th>
-                <th className="px-6 py-4">Skor (%)</th>
-                <th className="px-6 py-4">Aksi</th>
+                <th className="px-4 py-3">Provinsi</th>
+                <th className="px-4 py-3">Status</th>
+                <th className="px-4 py-3">Caketum</th>
+                <th className="px-4 py-3 text-center">BPD</th>
+                <th className="px-4 py-3">Suara Efektif</th>
+                <th className="px-4 py-3">Skor (%)</th>
+                <th className="px-4 py-3">Aksi</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-50 text-sm">
@@ -297,25 +358,25 @@ export default function BpdManagement() {
               ) : (
                 filteredBpds.map((bpd: Bpd) => (
                   <tr key={bpd.id} className="hover:bg-slate-50/80 transition-colors">
-                    <td className="px-6 py-4 font-black text-slate-800">{bpd.provinceName}</td>
-                    <td className="px-6 py-4">
+                    <td className="px-4 py-3 font-black text-slate-800 text-sm">{bpd.provinceName}</td>
+                    <td className="px-4 py-3">
                       <span className={`px-2 py-1 rounded text-[10px] font-black uppercase ${
                         bpd.supportStatus === 'TERKUNCI' ? 'bg-green-100 text-green-700' :
                         bpd.supportStatus === 'MENGARAH' ? 'bg-blue-100 text-blue-700' :
                         'bg-amber-100 text-amber-700'
                       }`}>{bpd.supportStatus}</span>
                     </td>
-                    <td className="px-6 py-4">
+                    <td className="px-4 py-3">
                       {bpd.supportedCandidate ? (
                         <div className="flex items-center gap-2">
                           <div className="w-2 h-2 rounded-full" style={{ backgroundColor: getCandidateColor(bpd.supportedCandidate.name) }} />
-                          <span className="font-bold text-slate-700">{bpd.supportedCandidate.name}</span>
+                          <span className="font-bold text-slate-700 text-sm">{bpd.supportedCandidate.name}</span>
                         </div>
                       ) : <span className="text-slate-300 font-bold">-</span>}
                     </td>
-                    <td className="px-6 py-4 text-center font-black text-slate-600">{bpd.supportedCandidateId ? 5 : 0}</td>
-                    <td className="px-6 py-4 font-black text-primary">{formatVotes(bpd.estimatedVotes)}</td>
-                    <td className="px-6 py-4">
+                    <td className="px-4 py-3 text-center font-black text-slate-600 text-sm">{bpd.supportedCandidateId ? 5 : 0}</td>
+                    <td className="px-4 py-3 font-black text-primary text-sm">{formatVotes(bpd.estimatedVotes)}</td>
+                    <td className="px-4 py-3">
                       <div className="flex items-center gap-2">
                         <div className="flex-1 w-12 bg-slate-100 h-1 rounded-full overflow-hidden">
                           <div className="h-full bg-primary" style={{ width: `${bpd.score}%` }} />
@@ -323,7 +384,7 @@ export default function BpdManagement() {
                         <span className="text-xs font-black">{formatPercent(bpd.score)}%</span>
                       </div>
                     </td>
-                    <td className="px-6 py-4">
+                    <td className="px-4 py-3">
                       <div className="flex items-center gap-1">
                         <button onClick={() => setSelectedBpdDetail(bpd)} className="p-2 hover:bg-slate-100 rounded-lg text-slate-400 hover:text-primary transition-all cursor-pointer">
                           <Eye className="w-4 h-4" />
@@ -345,6 +406,74 @@ export default function BpdManagement() {
               )}
             </tbody>
           </table>
+        </div>
+        
+        {/* Mobile Card View */}
+        <div className="lg:hidden space-y-3 p-4">
+          {isLoading ? (
+            <div className="text-center py-20 text-slate-400 font-bold animate-pulse uppercase tracking-widest">Memuat data...</div>
+          ) : filteredBpds.length === 0 ? (
+            <div className="text-center py-20 text-slate-400 font-bold uppercase tracking-widest text-xs">Tidak ada data ditemukan</div>
+          ) : (
+            filteredBpds.map((bpd: Bpd) => (
+              <div key={bpd.id} className="bg-slate-50 rounded-xl p-4 border border-slate-100 hover:shadow-md transition-all">
+                <div className="flex items-start justify-between mb-3">
+                  <div>
+                    <h3 className="font-black text-slate-800 text-base">{bpd.provinceName}</h3>
+                    <span className={`inline-block mt-1 px-2 py-0.5 rounded text-[10px] font-black uppercase ${
+                      bpd.supportStatus === 'TERKUNCI' ? 'bg-green-100 text-green-700' :
+                      bpd.supportStatus === 'MENGARAH' ? 'bg-blue-100 text-blue-700' :
+                      'bg-amber-100 text-amber-700'
+                    }`}>{bpd.supportStatus}</span>
+                  </div>
+                  <div className="flex gap-1">
+                    <button onClick={() => setSelectedBpdDetail(bpd)} className="p-2 hover:bg-white rounded-lg text-slate-400 hover:text-primary transition-all cursor-pointer">
+                      <Eye className="w-4 h-4" />
+                    </button>
+                    {canEdit && (
+                      <button onClick={() => setEditingBpd(bpd)} className="p-2 hover:bg-white rounded-lg text-slate-400 hover:text-blue-600 transition-all cursor-pointer">
+                        <Edit className="w-4 h-4" />
+                      </button>
+                    )}
+                    {canDelete && (
+                      <button onClick={() => { if(confirm('Hapus?')) deleteMutation.mutate(bpd.id) }} className="p-2 hover:bg-red-50 rounded-lg text-slate-400 hover:text-red-600 transition-all cursor-pointer">
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    )}
+                  </div>
+                </div>
+                
+                <div className="grid grid-cols-2 gap-3 text-xs">
+                  <div className="bg-white p-2 rounded-lg">
+                    <p className="text-[9px] font-bold text-slate-400 uppercase tracking-tighter mb-1">Caketum</p>
+                    {bpd.supportedCandidate ? (
+                      <div className="flex items-center gap-1.5">
+                        <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: getCandidateColor(bpd.supportedCandidate.name) }} />
+                        <span className="font-bold text-slate-700">{bpd.supportedCandidate.name}</span>
+                      </div>
+                    ) : <span className="text-slate-300 font-bold">-</span>}
+                  </div>
+                  <div className="bg-white p-2 rounded-lg">
+                    <p className="text-[9px] font-bold text-slate-400 uppercase tracking-tighter mb-1">BPD</p>
+                    <p className="font-black text-slate-600">{bpd.supportedCandidateId ? 5 : 0}</p>
+                  </div>
+                  <div className="bg-white p-2 rounded-lg">
+                    <p className="text-[9px] font-bold text-slate-400 uppercase tracking-tighter mb-1">Suara Efektif</p>
+                    <p className="font-black text-primary">{formatVotes(bpd.estimatedVotes)}</p>
+                  </div>
+                  <div className="bg-white p-2 rounded-lg">
+                    <p className="text-[9px] font-bold text-slate-400 uppercase tracking-tighter mb-1">Skor</p>
+                    <div className="flex items-center gap-1.5">
+                      <div className="flex-1 bg-slate-100 h-1 rounded-full overflow-hidden">
+                        <div className="h-full bg-primary" style={{ width: `${bpd.score}%` }} />
+                      </div>
+                      <span className="font-black text-slate-700">{formatPercent(bpd.score)}%</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))
+          )}
         </div>
       </div>
 
