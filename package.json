@@ -10,7 +10,8 @@
     "build:client": "cd client && npm run build",
     "start": "cd server && npm start",
     "prisma:generate": "cd server && npx prisma generate",
-    "prisma:studio": "cd server && npx prisma studio"
+    "prisma:studio": "cd server && npx prisma studio",
+    "deploy:prod": "cd server && npm run start:prod"
   },
   "devDependencies": {
     "concurrently": "^8.2.2"
