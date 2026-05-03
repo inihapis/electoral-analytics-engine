@@ -6,8 +6,7 @@ import {
   CartesianGrid, 
   Tooltip, 
   ResponsiveContainer, 
-  Cell,
-  Legend
+  Cell
 } from 'recharts';
 import { CANDIDATE_COLORS } from '@/utils/constants';
 

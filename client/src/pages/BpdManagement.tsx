@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { bpdService } from '@/services/api';
+import { bpdService, candidateService } from '@/services/api';
 import { formatPercent, formatVotes } from '@/utils/format';
 import { 
   Plus, 
@@ -9,9 +9,6 @@ import {
   Search, 
   Edit, 
   Trash2, 
-  CheckCircle2, 
-  AlertCircle, 
-  HelpCircle,
   X,
   FileSpreadsheet,
   AlertTriangle
@@ -71,7 +68,7 @@ export default function BpdManagement() {
     queryFn: bpdService.getAll
   });
 
-  const { data: candidates } = useQuery({
+  const { data: candidates } = useQuery<Candidate[]>({
     queryKey: ['candidates'],
     queryFn: candidateService.getAll
   });
@@ -345,6 +342,7 @@ export default function BpdManagement() {
           onSubmit={handleCreate}
           onCancel={() => setShowCreateForm(false)}
           isLoading={createMutation.isPending}
+          candidates={candidates || []}
         />
       )}
 
