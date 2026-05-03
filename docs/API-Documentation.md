@@ -2,11 +2,22 @@
 
 ## Overview
 
-RESTful API untuk Dashboard Pemenangan HIPMI dengan JWT authentication dan role-based access control.
+RESTful API untuk Dashboard Pemenangan HIPMI dengan JWT authentication, role-based access control, dan comprehensive BPD management system.
 
 **Base URL**: `https://api-electoral.langitgo.com/api` (Production) / `http://localhost:5000/api` (Local)
 **Authentication**: Bearer Token (JWT)  
 **Content-Type**: `application/json`
+**Version**: v0.0.1
+
+## 🆕 Latest Features
+
+- **Responsive Design**: Mobile-friendly table and card views
+- **Advanced Filtering**: Filter by status, candidate, and characteristics
+- **Bulk Operations**: CSV/XLSX import with error handling
+- **Change Tracking**: Field-level change detection and logging
+- **Real-time Notifications**: Toast notifications for all operations
+- **Data Export**: CSV export functionality
+- **Snapshot System**: Data backup and restore (SUPERADMIN only)
 
 ## Authentication
 

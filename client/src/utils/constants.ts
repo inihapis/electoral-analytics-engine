@@ -1,8 +1,8 @@
 export const CANDIDATE_COLORS: Record<string, string> = {
-  'reynaldo bryan': '#3b82f6',
-  'ade jona': '#ef4444',
-  'afie kalla': '#eab308',
-  'anthony leong': '#22c55e',
+  'reynaldo bryan': '#4F46E5',
+  'ade jona': '#DC2626',
+  'afie kalla': '#F59E0B',
+  'anthony leong': '#10B981',
   'default': '#94a3b8',
   'gray': '#94a3b8',
 };

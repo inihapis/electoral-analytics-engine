@@ -13,14 +13,14 @@ export const authenticate = (req: AuthRequest, res: Response, next: NextFunction
   const token = authHeader?.split(' ')[1];
 
   if (!token) {
-    console.warn(`[AUTH] Missing token for ${req.method} ${req.url} from ${req.headers.origin || 'unknown'}`);
+    // console.warn(`[AUTH] Missing token for ${req.method} ${req.url} from ${req.headers.origin || 'unknown'}`);
     return res.status(401).json({ error: 'Authentication required' });
   }
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secret') as { id: string; role: string };
     req.user = decoded;
-    console.log(`[AUTH] Verified user: ${decoded.id} (${decoded.role})`);
+    // console.log(`[AUTH] Verified user: ${decoded.id} (${decoded.role})`);
     next();
   } catch (error: any) {
     console.error(`[AUTH] Token verification failed: ${error.message}`);

@@ -45,7 +45,7 @@ export default function Dashboard() {
           </CardHeader>
           <CardContent>
             <div className="text-4xl font-black">{stats?.totalEfektif != null ? formatVotes(stats.totalEfektif) : 0}</div>
-            <p className="text-[10px] text-slate-500 mt-1 uppercase font-bold tracking-tighter">Akumulasi probabilitas dari 38 Provinsi</p>
+            <p className="text-[10px] text-slate-500 mt-1 uppercase font-bold">Akumulasi probabilitas dari 38 Provinsi</p>
           </CardContent>
         </Card>
 
@@ -76,7 +76,7 @@ export default function Dashboard() {
               <span className="text-lg text-slate-400">/ 38</span>
             </div>
 
-            <p className="text-[10px] text-slate-400 mt-1 uppercase font-bold tracking-tighter">
+            <p className="text-[10px] text-slate-400 mt-1 uppercase font-bold">
               BPD yang sudah memiliki arah dukungan
             </p>
           </CardContent>
@@ -86,27 +86,27 @@ export default function Dashboard() {
       {/* Candidate Status Cards */}
       <div className="space-y-4">
         <div className="flex items-center justify-between">
-          <h2 className="text-lg font-black tracking-tight text-slate-800 flex items-center gap-2">
+          <h2 className="text-lg font-black text-slate-800 flex items-center gap-2">
             <Users className="h-5 w-5 text-primary" />
             STATUS KEKUATAN CAKETUM
           </h2>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {candidates?.map((c: any, idx: number) => (
-            <Card key={c.id || `candidate-${idx}`} className="border-none shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden group">
-              <div className={`h-2.5 w-full`} style={{ backgroundColor: getCandidateColor(c.name) }} />
-              <CardHeader className="pb-2">
+            <Card key={c.id || `candidate-${idx}`} className="border-none shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden group pt-0">
+              <div className={`h-3 w-full relative`} style={{ backgroundColor: getCandidateColor(c.name) }} />
+              <CardHeader>
                 <CardTitle className="text-sm font-black truncate">{c.name}</CardTitle>
-                <CardDescription className="text-[10px] font-bold uppercase tracking-tighter">{c.affiliation || 'Independen'}</CardDescription>
+                <CardDescription className="text-[10px] font-bold uppercase tracking-widest">{c.affiliation || 'Independen'}</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-2 gap-2">
                   <div className="bg-slate-100/80 p-2 rounded-sm">
-                    <p className="text-[8px] font-black text-slate-500 uppercase tracking-tighter mb-0.5">BPD Dukung</p>
+                    <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest mb-0.5">BPD Dukung</p>
                     <p className="text-base font-black text-slate-800 leading-none">{c.totalBpdDukung || 0}</p>
                   </div>
                   <div className="bg-slate-100/80 p-2 rounded-sm">
-                    <p className="text-[8px] font-black text-slate-500 uppercase tracking-tighter mb-0.5">Suara Riil</p>
+                    <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest mb-0.5">Suara Riil</p>
                     <p className="text-base font-black text-slate-800 leading-none">{(c.totalBpdDukung || 0) * 5}</p>
                   </div>
                   <div className="col-span-2 bg-primary/5 p-3 rounded-sm border-l-4 border-primary shadow-sm mt-1 group-hover:bg-primary/10 transition-colors">
@@ -115,7 +115,7 @@ export default function Dashboard() {
                       <Activity className="w-3 h-3 text-primary/40" />
                     </div>
                     <div className="flex items-baseline gap-1.5">
-                      <p className="text-2xl font-black text-slate-900 tracking-tight">{formatVotes(c.totalSuaraEfektif || 0)}</p>
+                      <p className="text-2xl font-black text-slate-900">{formatVotes(c.totalSuaraEfektif || 0)}</p>
                       <p className="text-[9px] font-bold text-slate-400 italic uppercase">Probabilitas Skor</p>
                     </div>
                   </div>
@@ -132,7 +132,7 @@ export default function Dashboard() {
           <CardHeader>
             <div className="flex items-center gap-2 mb-1">
               <TrendingUp className="h-4 w-4 text-primary" />
-              <CardTitle className="text-base font-black uppercase tracking-tight">Progress Menuju Kemenangan</CardTitle>
+              <CardTitle className="text-base font-black uppercase">Progress Menuju Kemenangan</CardTitle>
             </div>
             <CardDescription className="text-xs">Persentase pencapaian target 96 suara (50%+1) per kandidat</CardDescription>
           </CardHeader>
@@ -153,7 +153,7 @@ export default function Dashboard() {
           <CardHeader>
             <div className="flex items-center gap-2 mb-1">
               <BarChart2 className="h-4 w-4 text-primary" />
-              <CardTitle className="text-base font-black uppercase tracking-tight">Distribusi Kekuatan Nasional</CardTitle>
+              <CardTitle className="text-base font-black uppercase">Distribusi Kekuatan Nasional</CardTitle>
             </div>
             <CardDescription className="text-xs">Dominasi total skor probabilitas di 38 provinsi</CardDescription>
           </CardHeader>
@@ -174,7 +174,7 @@ export default function Dashboard() {
         <CardHeader className="bg-slate-100/50 border-b border-slate-100">
           <div className="flex items-center gap-2 mb-1">
             <MapIcon className="h-4 w-4 text-primary" />
-            <CardTitle className="text-base font-black uppercase tracking-tight">Pemetaan Kekuatan (Heatmap)</CardTitle>
+            <CardTitle className="text-base font-black uppercase">Pemetaan Kekuatan (Heatmap)</CardTitle>
           </div>
           <CardDescription className="text-xs">Visualisasi dominasi kandidat di seluruh wilayah Indonesia</CardDescription>
         </CardHeader>
@@ -220,7 +220,7 @@ export default function Dashboard() {
                           <div className="flex flex-col">
                             <p className="text-[10px] text-slate-400 font-medium leading-tight">diperbarui oleh {bpd.updatedBy.username}</p>
                             {bpd.lastUpdatedFields && (
-                              <p className="text-[9px] font-bold text-primary uppercase tracking-tighter mt-0.5">
+                              <p className="text-[9px] font-bold text-primary uppercase mt-0.5">
                                 {bpd.lastUpdatedFields}
                               </p>
                             )}
@@ -253,7 +253,7 @@ export default function Dashboard() {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="p-4 bg-white rounded-lg border border-primary/10 shadow-sm">
-              <p className="text-xs font-bold text-slate-500 uppercase tracking-tighter mb-2">Kondisi Saat Ini</p>
+              <p className="text-xs font-bold text-slate-500 uppercase mb-2">Kondisi Saat Ini</p>
               <p className="text-sm text-slate-700 leading-relaxed italic">
                 "Berdasarkan data terkini, terdapat {stats?.terkunci || 0} wilayah terkunci. Fokus strategi sebaiknya dialihkan ke {stats?.mengarah || 0} wilayah dengan status 'MENGARAH' untuk memastikan dukungan suara efektif mencapai target 96."
               </p>

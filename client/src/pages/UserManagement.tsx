@@ -14,6 +14,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { useAppToast } from '@/hooks/use-app-toast';
 
 interface User {
   id: string;
@@ -31,6 +32,7 @@ export default function UserManagement() {
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [showCreateForm, setShowCreateForm] = useState(false);
   const queryClient = useQueryClient();
+  const appToast = useAppToast();
 
   const { data: users, isLoading } = useQuery({
     queryKey: ['users'],
@@ -65,9 +67,17 @@ export default function UserManagement() {
   ) || [];
 
   const handleDelete = (id: string) => {
-    if (confirm('Apakah Anda yakin ingin menghapus user ini?')) {
-      deleteMutation.mutate(id);
-    }
+    appToast.showToast({
+      title: 'Konfirmasi Penghapusan',
+      description: 'Apakah Anda yakin ingin menghapus user ini?',
+      action: (
+        <Button variant="ghost" onClick={() => deleteMutation.mutate(id)} className="text-xs font-bold text-red-600">
+          Ya, Hapus
+        </Button>
+      ),
+      duration: 10000,
+      type: 'info',
+    });
   };
 
   const handleEdit = (user: User) => {
@@ -133,6 +143,7 @@ export default function UserManagement() {
                   onSubmit={handleCreate}
                   onCancel={() => setShowCreateForm(false)}
                   isLoading={createMutation.isPending}
+                  appToast={appToast}
                 />
               </DialogContent>
             </Dialog>
@@ -184,13 +195,13 @@ export default function UserManagement() {
                     <div className="flex items-center space-x-3">
                       {getRoleBadge(user.role)}
                       <div className="flex space-x-2">
-                        <Dialog open={editingUser?.id === user.id} onOpenChange={(open) => !open && setEditingUser(null)}>
+                        <Dialog open={editingUser?.id === user.id} onOpenChange={(open: boolean) => !open && setEditingUser(null)}>
                           <DialogTrigger asChild>
                             <Button variant="outline" size="sm" onClick={() => handleEdit(user)}>
                               <Edit className="w-4 h-4" />
                             </Button>
                           </DialogTrigger>
-                          <DialogContent>
+                          <DialogContent className="max-w-2xl">
                             <DialogHeader>
                               <DialogTitle>Edit User</DialogTitle>
                               <DialogDescription>
@@ -202,6 +213,7 @@ export default function UserManagement() {
                               onSubmit={handleUpdate}
                               onCancel={() => setEditingUser(null)}
                               isLoading={updateMutation.isPending}
+                              appToast={appToast}
                             />
                           </DialogContent>
                         </Dialog>
@@ -238,27 +250,28 @@ interface UserFormProps {
   onSubmit: (data: any) => void;
   onCancel: () => void;
   isLoading: boolean;
+  appToast: ReturnType<typeof useAppToast>;
 }
 
-function UserForm({ initialData, onSubmit, onCancel, isLoading }: UserFormProps) {
-  const [formData, setFormData] = useState({
-    username: initialData?.username || '',
-    password: '',
-    role: initialData?.role || 'USER',
-  });
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!formData.username) {
-      alert('Username harus diisi');
-      return;
-    }
-
-    if (!initialData && !formData.password) {
-      alert('Password harus diisi untuk user baru');
-      return;
-    }
+function UserForm({ initialData, onSubmit, onCancel, isLoading, appToast }: UserFormProps) {
+    const [formData, setFormData] = useState({
+      username: initialData?.username || '',
+      password: '',
+      role: initialData?.role || 'USER',
+    });
+  
+    const handleSubmit = (e: React.FormEvent) => {
+      e.preventDefault();
+      
+      if (!formData.username) {
+        appToast.error('Username harus diisi');
+        return;
+      }
+  
+      if (!initialData && !formData.password) {
+        appToast.error('Password harus diisi untuk user baru');
+        return;
+      }
 
     const submitData = {
       username: formData.username,

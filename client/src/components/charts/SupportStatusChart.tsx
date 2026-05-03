@@ -44,7 +44,17 @@ export default function SupportStatusChart({ data }: SupportStatusChartProps) {
             <Cell key={`cell-${index}`} fill={entry.color} />
           ))}
         </Pie>
-        <Tooltip />
+        <Tooltip 
+            contentStyle={{ 
+              borderRadius: '12px', 
+              border: '1px solid var(--border)', 
+              boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)',
+              padding: '8px 12px',
+              fontSize: '12px',
+              zIndex: 1000
+            }}
+            wrapperStyle={{ zIndex: 1000 }}
+          />
         <Legend />
       </PieChart>
     </ResponsiveContainer>

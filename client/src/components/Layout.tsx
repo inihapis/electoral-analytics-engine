@@ -10,7 +10,6 @@ import {
   Info,
   BookOpen,
   ChevronRight,
-  Settings,
   ExternalLink,
   Menu,
   X,
@@ -67,7 +66,7 @@ export default function Layout() {
         {/* Logo Section */}
         <div className="p-6 lg:p-8 mb-4 flex items-center justify-between border-b border-slate-50 lg:border-none">
           <div className="flex items-center gap-3 group cursor-pointer">
-            <div className="w-10 h-10 lg:w-12 lg:h-12 rounded-sm p-2.5 bg-secondary/10 flex items-center justify-center shadow-lg shadow-primary/20 group-hover:scale-105 transition-transform duration-300">
+            <div className="w-10 h-10 lg:w-12 lg:h-12 rounded-sm flex items-center justify-center group-hover:scale-105 transition-transform duration-300">
               <img
                 src="/images/hipmi-logo.png"
                 alt="HIPMI Logo"
@@ -136,30 +135,32 @@ export default function Layout() {
             );
           })}
 
-          <div className="pt-6 pb-2">
-            <p className="px-4 text-[9px] lg:text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4">Lainnya</p>
-            {user?.role === 'SUPERADMIN' && (
-              <a
-                href={`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api-docs`}
-                target="_blank"
-                rel="noreferrer"
-                className="group flex items-center gap-3.5 px-4 py-3.5 lg:py-3 rounded-xl transition-all duration-300 text-slate-600 hover:bg-slate-50 hover:text-slate-900 cursor-pointer"
-              >
-                <BookOpen className="w-5 h-5 group-hover:scale-110 transition-transform duration-300" />
-                <span className="font-bold text-sm">API Documentation</span>
-                <ExternalLink className="ml-auto w-3 h-3 opacity-50" />
-              </a>
-            )}
-          </div>
+          {user?.role === 'SUPERADMIN' && (
+
+            <div className="pt-6 pb-2">
+              <p className="px-4 text-[9px] lg:text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4">Lainnya</p>
+              
+                <a
+                  href={`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api-docs`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="group flex items-center gap-3.5 px-4 py-3.5 lg:py-3 rounded-xl transition-all duration-300 text-slate-600 hover:bg-slate-50 hover:text-slate-900 cursor-pointer"
+                >
+                  <BookOpen className="w-5 h-5 group-hover:scale-110 transition-transform duration-300" />
+                  <span className="font-bold text-sm">API Documentation</span>
+                  <ExternalLink className="ml-auto w-3 h-3 opacity-50" />
+                </a>
+            </div>
+          )}
         </nav>
 
         {/* Footer Sidebar */}
         <div className="p-4 mt-auto border-t border-slate-50">
           <button
             onClick={handleLogout}
-            className="flex items-center gap-3.5 w-full px-4 py-4 lg:py-3 text-slate-500 hover:text-destructive hover:bg-destructive/5 active:bg-destructive/10 rounded-xl transition-all duration-300 font-black text-sm cursor-pointer"
+            className="flex items-center gap-3.5 w-full px-4 py-4 lg:py-3 text-red-500 hover:text-destructive hover:bg-destructive/5 active:bg-destructive/10 rounded-xl transition-all duration-300 font-black text-sm cursor-pointer"
           >
-            <LogOut className="w-5 h-5" />
+            <LogOut className="w-5 h-5 text-red-500" />
             Keluar Sistem
           </button>
         </div>

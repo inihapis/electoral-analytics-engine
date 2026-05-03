@@ -16,11 +16,11 @@ app.use((req, res, next) => {
   const method = req.method;
   const authHeader = req.headers.authorization;
 
-  // Log request details for debugging in Railway
-  console.log(`[DEBUG] ${new Date().toISOString()} | Method: ${method} | Origin: ${origin || 'No Origin'} | URL: ${req.url}`);
-  if (authHeader) {
-    console.log(`[DEBUG] Auth Header Present: ${authHeader.substring(0, 15)}...`);
-  }
+  // Log request details for debugging in Railway (commented for production)
+  // console.log(`[DEBUG] ${new Date().toISOString()} | Method: ${method} | Origin: ${origin || 'No Origin'} | URL: ${req.url}`);
+  // if (authHeader) {
+  //   console.log(`[DEBUG] Auth Header Present: ${authHeader.substring(0, 15)}...`);
+  // }
   next();
 });
 
@@ -35,10 +35,10 @@ app.use(cors({
 
     const cleanOrigin = origin.trim().replace(/\/$/, '');
 
-    console.log("[CORS CHECK]", {
-      origin: cleanOrigin,
-      allowed: allowedOrigins
-    });
+    // console.log("[CORS CHECK]", {
+    //   origin: cleanOrigin,
+    //   allowed: allowedOrigins
+    // });
 
     if (allowedOrigins.includes(cleanOrigin)) {
       return callback(null, true);

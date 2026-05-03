@@ -63,9 +63,9 @@ export const updateBpd = async (req: Request, res: Response) => {
   const data = req.body;
   const userId = (req as any).user?.id;
   
-  // Audit logging for Railway
-  console.log(`[BPD_UPDATE] User: ${userId} | Target ID: ${id}`);
-  console.log(`[BPD_UPDATE] Payload:`, JSON.stringify(data, null, 2));
+  // Audit logging for Railway (commented for production)
+  // console.log(`[BPD_UPDATE] User: ${userId} | Target ID: ${id}`);
+  // console.log(`[BPD_UPDATE] Payload:`, JSON.stringify(data, null, 2));
   
   // Validasi field yang wajib diisi
   if (!data.provinceName) {
@@ -272,7 +272,7 @@ export const bulkUpload = async (req: any, res: Response) => {
     const sheet = workbook.Sheets[sheetName];
     const rows = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: '' }) as any[][];
 
-    console.log(`[BULK_UPLOAD] Start processing file. Total rows: ${rows.length}`);
+    // console.log(`[BULK_UPLOAD] Start processing file. Total rows: ${rows.length}`);
 
     if (rows.length <= 1) {
       return res.status(400).json({ error: 'File tidak berisi data yang valid' });
@@ -365,7 +365,7 @@ export const bulkUpload = async (req: any, res: Response) => {
         });
         uploadResult.push(provinceName);
       } catch (err: any) {
-        console.error(`Error saving row ${rowIndex + 2}:`, err);
+        // console.error(`Error saving row ${rowIndex + 2}:`, err);
         errors.push(`Baris ${rowIndex + 2} (${provinceName}): ${err.message || 'Gagal simpan'}`);
       }
     }

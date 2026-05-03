@@ -37,7 +37,7 @@ export default function Login() {
           <div className="mx-auto h-20 w-20 bg-gradient-to-tr from-primary to-primary/80 rounded-[2rem] flex items-center justify-center shadow-lg shadow-primary/20 rotate-3 hover:rotate-0 transition-transform duration-500">
             <span className="text-white font-black text-3xl">H</span>
           </div>
-          <h2 className="mt-8 text-3xl font-black text-slate-900 tracking-tight">Selamat Datang</h2>
+          <h2 className="mt-8 text-3xl font-black text-slate-900">Selamat Datang</h2>
           <p className="mt-2 text-sm text-slate-500 font-medium">
             Sistem Pemenangan Internal HIPMI
           </p>

@@ -1,5 +1,6 @@
 province_name,total_votes,target_mc,political_affiliation,supported_candidate,support_status,characteristic,surat_baiat,afiliasi_politik,video_dukungan,kedekatan_mc,atribut_fisik,sosial_media
 Aceh,5,Target MC Aceh,Partai A,,DINAMIS,WASPADA,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE
-DKI Jakarta,5,Target MC Jakarta,Partai B,Ade Jona,TERKUNCI,SOLID,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE
-Jawa Barat,5,Target MC Jabar,Partai C,Anthony Leong,MENGARAH,RENTAN,TRUE,FALSE,TRUE,TRUE,FALSE,TRUE
+DKI Jakarta,5,Target MC Jakarta,Partai B,Reynaldo Bryan,TERKUNCI,SOLID,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE
+Jawa Barat,5,Target MC Jabar,Partai C,Ade Jona,MENGARAH,RENTAN,TRUE,FALSE,TRUE,TRUE,FALSE,TRUE
 Jawa Tengah,5,Target MC Jateng,Partai D,Afie Kalla,TERKUNCI,SOLID,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE
+Jawa Timur,5,Target MC Jatim,Partai E,Anthony Leong,MENGARAH,WASPADA,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE

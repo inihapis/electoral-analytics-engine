@@ -57,7 +57,7 @@ export default function Information() {
               </div>
               <CardDescription>Template dan dokumen pendukung</CardDescription>
             </CardHeader>
-            <CardContent className="pt-6 space-y-4">
+            <CardContent className="space-y-4 -mt-4">
               <div className="p-4 rounded-2xl bg-slate-50 border border-slate-100 group hover:border-primary/30 transition-all duration-300">
                 <div className="flex items-center gap-4 mb-4">
                   <div className="p-3 bg-white rounded-xl shadow-sm text-green-600">
@@ -98,7 +98,6 @@ export default function Information() {
             </CardContent>
           </Card>
 
-          {userRole === 'SUPERADMIN' && (
             <Card className="border-none shadow-xl shadow-slate-200/50 bg-white">
               <CardHeader>
                 <div className="flex items-center gap-2 text-primary mb-1">
@@ -128,7 +127,26 @@ export default function Information() {
                   </p>
                   <div className="bg-slate-50 p-3 rounded-xl border border-slate-100">
                     <code className="text-[11px] font-mono text-slate-600 leading-relaxed">
-                      Estimasi = (Skor / 100) × 5
+                      Estimasi = (Skor / 100) × 5<br />
+                      Total Efektif = Σ Estimasi Semua BPD
+                    </code>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <p className="text-sm font-bold text-slate-700 flex items-center gap-2">
+                    <span className="w-1.5 h-1.5 rounded-full bg-orange-500" />
+                    Detail Perhitungan Poin
+                  </p>
+                  <div className="bg-orange-50 p-3 rounded-xl border border-orange-100">
+                    <code className="text-[11px] font-mono text-slate-600 leading-relaxed">
+                      Surat Baiat: 5.5 poin<br />
+                      Afiliasi Politik: 4.2 poin<br />
+                      Video Dukungan: 3.8 poin<br />
+                      Kedekatan MC: 3.2 poin<br />
+                      Atribut Fisik: 2.1 poin<br />
+                      Sosial Media: 1.2 poin<br />
+                      <strong>Total Maksimal: 20.0 poin</strong>
                     </code>
                   </div>
                 </div>
@@ -147,7 +165,6 @@ export default function Information() {
                 </div>
               </CardContent>
             </Card>
-          )}
         </div>
 
         {/* Right Column: Detailed Info */}
@@ -225,7 +242,7 @@ export default function Information() {
                     <div className="flex items-center gap-4">
                       <div className={`w-3 h-12 rounded-full ${c.color}`} />
                       <div>
-                        <h4 className={`text-lg font-black tracking-tight ${c.text}`}>{c.name}</h4>
+                        <h4 className={`text-lg font-black ${c.text}`}>{c.name}</h4>
                         <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">{c.party}</p>
                       </div>
                     </div>
