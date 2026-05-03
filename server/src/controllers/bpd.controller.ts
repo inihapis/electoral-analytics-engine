@@ -93,6 +93,23 @@ export const updateBpd = async (req: Request, res: Response) => {
   }
   
     try {
+      // Ambil data lama untuk perbandingan
+      const oldBpd = await prisma.bpd.findUnique({ where: { id } });
+      const changedFields: string[] = [];
+      
+      if (oldBpd) {
+        if (oldBpd.provinceName !== data.provinceName) changedFields.push('Provinsi');
+        if (oldBpd.supportStatus !== data.supportStatus) changedFields.push('Status');
+        if (oldBpd.characteristic !== data.characteristic) changedFields.push('Karakteristik');
+        if (oldBpd.supportedCandidateId !== (data.supportedCandidateId || null)) changedFields.push('Dukungan');
+        if (oldBpd.suratBaiat !== Boolean(data.suratBaiat)) changedFields.push('Surat Baiat');
+        if (oldBpd.afiliasiPolitik !== Boolean(data.afiliasiPolitik)) changedFields.push('Afiliasi Politik');
+        if (oldBpd.videoDukungan !== Boolean(data.videoDukungan)) changedFields.push('Video Dukungan');
+        if (oldBpd.kedekatanMc !== Boolean(data.kedekatanMc)) changedFields.push('Kedekatan MC');
+        if (oldBpd.atributFisik !== Boolean(data.atributFisik)) changedFields.push('Atribut Fisik');
+        if (oldBpd.sosialMedia !== Boolean(data.sosialMedia)) changedFields.push('Sosial Media');
+      }
+
       const bpdUpdateData: any = {
         provinceName: data.provinceName,
         totalVotes: Number(data.totalVotes) || 5,
@@ -108,11 +125,16 @@ export const updateBpd = async (req: Request, res: Response) => {
         sosialMedia: Boolean(data.sosialMedia),
         supportedCandidateId: data.supportedCandidateId || null,
         updatedById: userId,
+        lastUpdatedFields: changedFields.length > 0 ? changedFields.join(', ') : 'Tidak ada perubahan field utama'
       };
 
       const bpd = await prisma.bpd.update({
       where: { id },
-      data: bpdUpdateData
+      data: bpdUpdateData,
+      include: {
+        updatedBy: { select: { username: true } },
+        supportedCandidate: { select: { name: true } }
+      }
     });
     res.json(bpd);
   } catch (error) {

@@ -45,6 +45,7 @@ model Bpd {
   updatedBy            User                 @relation("UpdatedBy", fields: [updatedById], references: [id])
   supportedCandidateId String?
   supportedCandidate   Candidate?           @relation("SupportedBpd", fields: [supportedCandidateId], references: [id])
+  lastUpdatedFields    String?
 }
 
 enum Role {

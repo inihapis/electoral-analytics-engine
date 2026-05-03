@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate, Outlet, useLocation } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
+import { bpdService } from '@/services/api';
 import {
   Database,
   LogOut,
@@ -11,7 +13,10 @@ import {
   Settings,
   ExternalLink,
   Menu,
-  X
+  X,
+  Activity,
+  Clock,
+  User as UserIcon
 } from 'lucide-react';
 
 export default function Layout() {
@@ -20,6 +25,16 @@ export default function Layout() {
   const userJson = localStorage.getItem('user');
   const user = userJson ? JSON.parse(userJson) : null;
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+  const { data: bpds } = useQuery({
+    queryKey: ['bpds'],
+    queryFn: bpdService.getAll,
+    refetchInterval: 30000 // Refetch every 30s for real-time feel
+  });
+
+  const latestUpdate = bpds && bpds.length > 0
+    ? [...bpds].sort((a: any, b: any) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())[0]
+    : null;
 
   const handleLogout = () => {
     localStorage.removeItem('token');
@@ -37,10 +52,9 @@ export default function Layout() {
   return (
     <div className="flex h-screen bg-[#f1f5f9] text-slate-900 font-sans selection:bg-primary/10 selection:text-primary overflow-hidden">
       {/* Mobile Overlay */}
-      <div 
-        className={`fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[60] transition-opacity duration-500 lg:hidden ${
-          isSidebarOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
-        }`}
+      <div
+        className={`fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[60] transition-opacity duration-500 lg:hidden ${isSidebarOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
+          }`}
         onClick={() => setIsSidebarOpen(false)}
       />
 
@@ -53,16 +67,20 @@ export default function Layout() {
         {/* Logo Section */}
         <div className="p-6 lg:p-8 mb-4 flex items-center justify-between border-b border-slate-50 lg:border-none">
           <div className="flex items-center gap-3 group cursor-pointer">
-            <div className="w-10 h-10 lg:w-12 lg:h-12 bg-gradient-to-tr from-primary via-primary/90 to-primary/80 rounded-2xl flex items-center justify-center shadow-lg shadow-primary/20 group-hover:scale-105 transition-transform duration-300">
-              <span className="text-white font-black text-xl tracking-tighter">H</span>
+            <div className="w-10 h-10 lg:w-12 lg:h-12 rounded-sm p-2.5 bg-secondary/10 flex items-center justify-center shadow-lg shadow-primary/20 group-hover:scale-105 transition-transform duration-300">
+              <img
+                src="/images/hipmi-logo.png"
+                alt="HIPMI Logo"
+                className="w-10 h-10 object-contain"
+              />
             </div>
             <div>
               <h1 className="text-lg lg:text-xl font-black tracking-tight text-slate-900 group-hover:text-primary transition-colors leading-none">HIPMI</h1>
               <p className="text-[9px] lg:text-[10px] uppercase tracking-widest text-slate-400 font-bold leading-none mt-1.5">Sistem Pemenangan</p>
             </div>
           </div>
-          <button 
-            onClick={() => setIsSidebarOpen(false)} 
+          <button
+            onClick={() => setIsSidebarOpen(false)}
             className="lg:hidden p-2.5 bg-slate-50 rounded-xl text-slate-400 hover:text-slate-600 active:scale-95 transition-all"
           >
             <X className="w-5 h-5" />
@@ -103,8 +121,8 @@ export default function Layout() {
                 to={item.to}
                 onClick={() => setIsSidebarOpen(false)}
                 className={`group flex items-center gap-3.5 px-4 py-3.5 lg:py-3 rounded-xl transition-all duration-300 relative ${isActive
-                    ? 'bg-primary text-white shadow-xl shadow-primary/20 translate-x-1'
-                    : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900 active:bg-slate-100'
+                  ? 'bg-primary text-white shadow-xl shadow-primary/20 translate-x-1'
+                  : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900 active:bg-slate-100'
                   }`}
               >
                 <Icon className={`w-5 h-5 transition-transform duration-300 ${isActive ? 'scale-110' : 'group-hover:scale-110'}`} />
@@ -154,10 +172,10 @@ export default function Layout() {
         <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-secondary/5 rounded-full blur-[100px] -z-10 translate-y-1/2 -translate-x-1/2" />
 
         {/* Header */}
-        <header className="bg-white/70 backdrop-blur-md border-b border-slate-200/60 px-4 lg:px-10 py-4 lg:py-6 z-10">
-          <div className="flex items-center justify-between">
+        <header className="bg-white/70 backdrop-blur-md border-b border-slate-200/60 px-4 lg:px-10 py-4 z-10">
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
             <div className="flex items-center gap-3 lg:gap-4 animate-in fade-in slide-in-from-left-4 duration-500">
-              <button 
+              <button
                 onClick={() => setIsSidebarOpen(true)}
                 className="lg:hidden p-2.5 bg-slate-100 rounded-xl text-slate-600 hover:bg-slate-200 active:scale-95 transition-all"
               >
@@ -176,7 +194,41 @@ export default function Layout() {
               </div>
             </div>
 
-            <div className="flex items-center gap-2 lg:gap-4">
+            {/* Latest Activity In Header */}
+            {latestUpdate && (
+              <div className="hidden sm:flex items-center gap-4 bg-slate-50 border border-primary/50 rounded-lg px-4 py-2 animate-in fade-in zoom-in duration-700">
+                <div className="flex items-center gap-2 pr-4 border-r border-primary/50">
+                  <Activity className="w-4 h-4 text-primary animate-pulse" />
+                  <div className="flex flex-col">
+                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-tighter leading-none mb-1">Aktivitas Terakhir</span>
+                    <span className="text-xs font-black text-slate-700 leading-none">{latestUpdate.provinceName}</span>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-2">
+                    <Clock className="w-3.5 h-3.5 text-slate-400" />
+                    <span className="text-[11px] font-bold text-slate-600 leading-tight">
+                      {new Date(latestUpdate.updatedAt).toLocaleDateString('id-ID', { day: '2-digit', month: 'short' })} • {new Date(latestUpdate.updatedAt).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <UserIcon className="w-3.5 h-3.5 text-slate-400" />
+                    <span className="text-xs font-bold text-slate-600 truncate max-w-[80px]">{latestUpdate.updatedBy.username}</span>
+                  </div>
+                </div>
+
+                {latestUpdate.lastUpdatedFields && (
+                  <div className="ml-2 pl-4 border-l border-slate-200 hidden xl:block">
+                    <span className="text-[9px] font-black bg-primary/10 text-primary px-2 py-0.5 rounded-full uppercase">
+                      Update: {latestUpdate.lastUpdatedFields.split(',')[0]}...
+                    </span>
+                  </div>
+                )}
+              </div>
+            )}
+
+            <div className="flex items-center gap-2 lg:gap-4 self-end lg:self-auto">
               <button className="w-9 h-9 lg:w-10 lg:h-10 rounded-xl bg-slate-100 flex items-center justify-center text-slate-600 hover:bg-slate-200 active:scale-95 transition-all">
                 <Settings className="w-4 h-4 lg:w-5 lg:h-5" />
               </button>
