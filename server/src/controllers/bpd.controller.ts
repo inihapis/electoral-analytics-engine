@@ -63,6 +63,10 @@ export const updateBpd = async (req: Request, res: Response) => {
   const data = req.body;
   const userId = (req as any).user?.id;
   
+  // Audit logging for Railway
+  console.log(`[BPD_UPDATE] User: ${userId} | Target ID: ${id}`);
+  console.log(`[BPD_UPDATE] Payload:`, JSON.stringify(data, null, 2));
+  
   // Validasi field yang wajib diisi
   if (!data.provinceName) {
     return res.status(400).json({ error: 'Nama provinsi wajib diisi' });
@@ -112,7 +116,11 @@ export const updateBpd = async (req: Request, res: Response) => {
     });
     res.json(bpd);
   } catch (error) {
-    res.status(500).json({ error: 'Failed to update BPD' });
+    console.error('Update BPD Error:', error);
+    res.status(500).json({ 
+      error: 'Failed to update BPD', 
+      details: error instanceof Error ? error.message : 'Unknown error'
+    });
   }
 };
 
@@ -241,6 +249,8 @@ export const bulkUpload = async (req: any, res: Response) => {
     const sheetName = workbook.SheetNames[0];
     const sheet = workbook.Sheets[sheetName];
     const rows = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: '' }) as any[][];
+
+    console.log(`[BULK_UPLOAD] Start processing file. Total rows: ${rows.length}`);
 
     if (rows.length <= 1) {
       return res.status(400).json({ error: 'File tidak berisi data yang valid' });

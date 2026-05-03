@@ -168,15 +168,15 @@ export default function BpdManagement() {
     <div className="space-y-6">
       {/* Header */}
       <Card className="border-none shadow-xl bg-white overflow-hidden">
-        <CardHeader className="pb-6">
+        <CardHeader className="p-5 lg:p-8 border-b border-slate-50 bg-white">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
-              <CardTitle className="text-xl font-black text-slate-800">Manajemen Database BPD</CardTitle>
-              <CardDescription className="text-xs font-bold uppercase tracking-widest text-slate-400">
-                Kelola data provinsi dan dukungan BPD
+              <CardTitle className="text-xl lg:text-2xl font-black text-slate-900 tracking-tight">Database BPD</CardTitle>
+              <CardDescription className="text-[10px] font-black uppercase tracking-[0.15em] text-slate-400 mt-1">
+                Kelola data provinsi & dukungan
               </CardDescription>
             </div>
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               {canUpload && (
                 <Dialog open={showBulkUpload} onOpenChange={setShowBulkUpload}>
                   <DialogTrigger asChild>
@@ -276,8 +276,8 @@ export default function BpdManagement() {
 
       {/* Main Table */}
       <div className="bg-white rounded-xl shadow-xl border border-slate-100 overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left">
+        <div className="overflow-x-auto custom-scrollbar">
+          <table className="w-full text-left min-w-[1000px]">
             <thead className="bg-slate-50 text-[10px] uppercase text-slate-400 font-black tracking-widest border-b border-slate-100">
               <tr>
                 <th className="px-6 py-4">Provinsi</th>

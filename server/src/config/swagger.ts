@@ -15,8 +15,12 @@ const options = {
     servers: [
       {
         url: (process.env.API_URL || 'http://localhost:5000') + '/api',
-        description: 'Development server',
+        description: 'Server Utama (Sesuaikan API_URL di env)',
       },
+      {
+        url: '/api',
+        description: 'Relative URL (Gunakan ini jika API_URL tidak diset)',
+      }
     ],
     components: {
       securitySchemes: {

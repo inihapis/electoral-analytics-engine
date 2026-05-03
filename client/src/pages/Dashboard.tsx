@@ -56,21 +56,29 @@ export default function Dashboard() {
           <CardContent>
             <div className="text-4xl font-black text-slate-900">{stats?.terkunci || 0} <span className="text-lg text-slate-400">/ 38</span></div>
             <div className="w-full bg-slate-100 h-1.5 rounded-full mt-2 overflow-hidden">
-              <div 
-                className="h-full bg-green-500 transition-all duration-1000" 
-                style={{ width: `${((stats?.terkunci || 0) / 38) * 100}%` }} 
+              <div
+                className="h-full bg-green-500 transition-all duration-1000"
+                style={{ width: `${((stats?.terkunci || 0) / 38) * 100}%` }}
               />
             </div>
           </CardContent>
         </Card>
-
         <Card className="relative overflow-hidden border-none bg-white shadow-xl shadow-slate-200/50">
           <CardHeader className="pb-2">
-            <CardTitle className="text-xs font-bold uppercase tracking-widest text-slate-500 text-secondary">Belum Menentukan</CardTitle>
+            <CardTitle className="text-xs font-bold uppercase tracking-widest text-slate-500">
+              Sudah Menentukan Arah
+            </CardTitle>
           </CardHeader>
+
           <CardContent>
-            <div className="text-4xl font-black text-slate-900">{stats?.unassigned != null ? stats.unassigned : (38 - (stats?.totalBpds || 0))} <span className="text-lg text-slate-400">/ 38</span></div>
-            <p className="text-[10px] text-slate-400 mt-1 uppercase font-bold tracking-tighter">BPD yang belum menentukan arah dukungan</p>
+            <div className="text-4xl font-black text-slate-900">
+              {(stats?.totalBpds || 38) - (stats?.unassigned || 0)}
+              <span className="text-lg text-slate-400">/ 38</span>
+            </div>
+
+            <p className="text-[10px] text-slate-400 mt-1 uppercase font-bold tracking-tighter">
+              BPD yang sudah memiliki arah dukungan
+            </p>
           </CardContent>
         </Card>
       </div>
@@ -83,7 +91,7 @@ export default function Dashboard() {
             STATUS KEKUATAN CAKETUM
           </h2>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {candidates?.map((c: any, idx: number) => (
             <Card key={c.id || `candidate-${idx}`} className="border-none shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden group">
               <div className={`h-1 w-full`} style={{ backgroundColor: getCandidateColor(c.name) }} />
@@ -93,15 +101,15 @@ export default function Dashboard() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-3 gap-2">
-                  <div className="bg-slate-50 p-2 rounded-lg">
+                  <div className="bg-slate-100 p-2 rounded-lg">
                     <p className="text-[8px] font-bold text-slate-400 uppercase tracking-tighter">BPD Dukung</p>
                     <p className="text-base font-black text-slate-800">{c.totalBpdDukung || 0}</p>
                   </div>
-                  <div className="bg-slate-50 p-2 rounded-lg">
+                  <div className="bg-slate-100 p-2 rounded-lg">
                     <p className="text-[8px] font-bold text-slate-400 uppercase tracking-tighter">Suara Riil</p>
                     <p className="text-base font-black text-slate-800">{(c.totalBpdDukung || 0) * 5}</p>
                   </div>
-                  <div className="bg-slate-50 p-2 rounded-lg border-l-2 border-primary/20">
+                  <div className="bg-slate-100 p-2 rounded-lg border-l-2 border-primary/20">
                     <p className="text-[8px] font-bold text-slate-400 uppercase tracking-tighter">Suara Efektif</p>
                     <p className="text-base font-black text-primary">{formatVotes(c.totalSuaraEfektif || 0)}</p>
                   </div>
@@ -112,12 +120,12 @@ export default function Dashboard() {
                     <span className="text-slate-900">{formatPercent(c.progress || 0)}%</span>
                   </div>
                   <div className="w-full bg-slate-100 h-1 rounded-full overflow-hidden">
-                    <div 
-                      className="h-full transition-all duration-1000" 
-                      style={{ 
+                    <div
+                      className="h-full transition-all duration-1000"
+                      style={{
                         width: `${Math.min(c.progress || 0, 100)}%`,
                         backgroundColor: getCandidateColor(c.name)
-                      }} 
+                      }}
                     />
                   </div>
                 </div>
@@ -138,7 +146,7 @@ export default function Dashboard() {
             <CardDescription className="text-xs">Persentase pencapaian target 96 suara (50%+1) per kandidat</CardDescription>
           </CardHeader>
           <CardContent>
-            <CandidateProgressChart 
+            <CandidateProgressChart
               data={candidates?.map((c: any) => ({
                 id: c.id,
                 name: c.name,
@@ -159,7 +167,7 @@ export default function Dashboard() {
             <CardDescription className="text-xs">Dominasi total skor probabilitas di 38 provinsi</CardDescription>
           </CardHeader>
           <CardContent>
-            <NationalDistributionChart 
+            <NationalDistributionChart
               data={candidates?.map((c: any) => ({
                 name: c.name,
                 color: getCandidateColor(c.name),
@@ -172,7 +180,7 @@ export default function Dashboard() {
 
       {/* Heatmap Section */}
       <Card className="border-none shadow-xl overflow-hidden">
-        <CardHeader className="bg-slate-50/50 border-b border-slate-100">
+        <CardHeader className="bg-slate-100/50 border-b border-slate-100">
           <div className="flex items-center gap-2 mb-1">
             <MapIcon className="h-4 w-4 text-primary" />
             <CardTitle className="text-base font-black uppercase tracking-tight">Pemetaan Kekuatan (Heatmap)</CardTitle>
@@ -181,7 +189,7 @@ export default function Dashboard() {
         </CardHeader>
         <CardContent className="p-0">
           <div className="h-[400px] sm:h-[500px]">
-            <IndonesiaMapChart 
+            <IndonesiaMapChart
               data={bpds?.map((bpd: any) => {
                 return {
                   provinceName: bpd.provinceName,
@@ -211,7 +219,7 @@ export default function Dashboard() {
                   ?.sort((a: any, b: any) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
                   .slice(0, 4)
                   .map((bpd: any, idx: number) => (
-                    <div key={bpd.id || `bpd-update-${idx}`} className="flex items-center justify-between p-3 border border-slate-50 rounded-xl hover:bg-slate-50 transition-all duration-300">
+                    <div key={bpd.id || `bpd-update-${idx}`} className="flex items-center justify-between p-3 border border-slate-50 rounded-xl hover:bg-slate-100 transition-all duration-300">
                       <div className="flex items-center gap-3">
                         <div className="w-8 h-8 bg-primary/5 rounded-lg flex items-center justify-center">
                           <MapIcon className="w-4 h-4 text-primary" />
@@ -222,11 +230,10 @@ export default function Dashboard() {
                         </div>
                       </div>
                       <div className="text-right">
-                        <span className={`px-2 py-0.5 rounded-full text-[9px] font-black uppercase ${
-                          bpd.supportStatus === 'TERKUNCI' ? 'bg-green-100 text-green-700' :
-                          bpd.supportStatus === 'MENGARAH' ? 'bg-blue-100 text-blue-700' :
-                          'bg-orange-100 text-orange-700'
-                        }`}>
+                        <span className={`px-2 py-0.5 rounded-full text-[9px] font-black uppercase ${bpd.supportStatus === 'TERKUNCI' ? 'bg-green-100 text-green-700' :
+                            bpd.supportStatus === 'MENGARAH' ? 'bg-blue-100 text-blue-700' :
+                              'bg-orange-100 text-orange-700'
+                          }`}>
                           {bpd.supportStatus}
                         </span>
                         <p className="text-[10px] font-bold text-slate-500 mt-1">{new Date(bpd.updatedAt).toLocaleDateString('id-ID')}</p>
