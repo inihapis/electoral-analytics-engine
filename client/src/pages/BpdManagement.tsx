@@ -73,10 +73,7 @@ export default function BpdManagement() {
 
   const { data: candidates } = useQuery({
     queryKey: ['candidates'],
-    queryFn: async () => {
-      const response = await fetch('/api/candidates');
-      return response.json();
-    }
+    queryFn: candidateService.getAll
   });
 
   const deleteMutation = useMutation({
