@@ -9,7 +9,11 @@
     "postinstall": "prisma generate",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate deploy",
-    "prisma:seed": "tsx prisma/seed.ts"
+    "prisma:seed": "tsx prisma/seed.ts",
+    "db:push": "prisma db push",
+    "db:reset": "prisma db push --force-reset && npm run prisma:seed",
+    "deploy:setup": "prisma migrate deploy && tsx prisma/seed.ts",
+    "deploy:fresh": "prisma db push --force-reset && tsx prisma/seed.ts"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"

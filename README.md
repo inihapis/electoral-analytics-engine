@@ -341,41 +341,21 @@ cd client
 npm run dev
 ```
 
-### Production Build
-```bash
-# Build frontend
-cd client
-npm run build
+### Railway Deployment (Backend)
+1. **Environment Variables**: Set `DATABASE_URL`, `JWT_SECRET`, `CORS_ORIGIN`, etc.
+2. **Setup Command**: Untuk instalasi pertama atau reset data, jalankan:
+   ```bash
+   npm run deploy:fresh
+   ```
+3. **Start Command**:
+   ```bash
+   npm start
+   ```
 
-# Build backend
-cd server
-npm run build
-
-# Start production server
-npm start
-```
-
-### Docker Deployment
-```dockerfile
-# Dockerfile (backend)
-FROM node:18-alpine
-WORKDIR /app
-COPY package*.json ./
-RUN npm ci --only=production
-COPY . .
-RUN npm run build
-EXPOSE 5000
-CMD ["npm", "start"]
-```
-
-### Environment Setup
-```bash
-# Production environment
-NODE_ENV=production
-DATABASE_URL=postgresql://...
-JWT_SECRET=production-secret-key
-PORT=5000
-```
+### Vercel Deployment (Frontend)
+1. **Environment Variables**: Set `VITE_API_URL` (URL API Backend Railway).
+2. **Build Command**: `npm run build`.
+3. **Install Command**: `npm install`.
 
 ## 🔧 Default Credentials
 
